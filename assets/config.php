@@ -1,6 +1,6 @@
 <?php
 // Přístupové údaje k databázi (Localhost)
-$servername = "192.168.0.64:3306";
+$servername = "127.0.0.1:3307";
 $username = 'root';
 $password = "root";
 $dbname = "moneys2";
