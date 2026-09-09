@@ -27,6 +27,8 @@ if (isset($_POST["action"])) {
     $sheet = $_POST["sheet"];
     switch($_POST["action"]) {
         case "archive": {
+            //TODO: Archive
+
             //Run SQL
             $stmt = $conn->prepare("UPDATE `tables` SET archived=1 WHERE name=?");
             if(!$stmt->bind_param("s", $sheet) || !$stmt->execute() || $stmt->affected_rows == 0) {
