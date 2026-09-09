@@ -36,7 +36,7 @@
             <form-status-message></form-status-message>
         </form-box>
     </body>
-    <script type="module" src="./formWebScripts/js/formScript.js"></script>
+    <script type="module" src="../formWebScripts/js/formScript.js"></script>
     <script type="module">
         import { SendPOSTDataToServerAsync } from "../formWebScripts/js/serverComunication.js";
         import { SendToast, SetWaitStatusForms } from "../formWebScripts/js/formScript.js";
