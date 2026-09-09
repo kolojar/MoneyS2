@@ -71,7 +71,7 @@ if (isset($_POST["action"])) {
             <a href="?view=archived"><button class='<?php echo $_GET["view"] == "archived" ? "formOkColor" : "formInfoColor"; ?>'>Archived sheets</button></a>
         </div>
         <div class='formButtonBox formJustifyRight'>
-            <a href="./user/newSheet.php"><button class='formWarnColor'>Create new sheet</button></a>
+            <a href="../user/newSheet.php"><button class='formWarnColor'>Create new sheet</button></a>
             <a href="./logout.php"><button class='formErrorColor'>Logout</button></a>
         </div>
         </div>
