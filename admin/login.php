@@ -23,6 +23,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Login to Admin</title>
         <link rel="stylesheet" href="../formWebScripts/css/formStyle.css" />
+        <link rel="stylesheet" href="../assets/style.css" />
         <meta name="form-icons-main-db" content="../formWebScripts/formIcons.json" />
     </head>
     <body class="formBackground" form-box-holder>
@@ -30,8 +31,9 @@
             <p class="formHeader">Login to Admin</p>
             <form-input type="password" tabindex="1" label="Password" id="password" placeholder="Your password"></form-input>
             <div class="formButtonBoxHolder formCenter">
-                <button id="send" tabindex="2" class="formButton formOkColor">Continue</button>
+                <button id="send" tabindex="2" class="formButton formOkColor">Login</button>
             </div>
+            <form-status-message></form-status-message>
         </form-box>
     </body>
     <script type="module" src="./formWebScripts/js/formScript.js"></script>
