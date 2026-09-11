@@ -3,6 +3,12 @@
 require __DIR__ . "/../assets/config.php";
 session_start();
 
+if(!isset($_GET["id"])) {
+    http_response_code(400);
+    echo "Missing ID parameter.";
+    die();
+}
+
 //Check if archived
 $archivedStmt = $conn->prepare("SELECT archived FROM `tables` WHERE name=?");
 $id = $_GET["id"];
@@ -20,11 +26,6 @@ if($isArchived == 1) {
 if (isset($_GET["viewOnly"])) {
     generateTables(false,true, $conn);
     die();
-}
-
-function encodeURIComponent($str) {
-    $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
-    return strtr(rawurlencode($str), $revert);
 }
 ?>
 
@@ -65,8 +66,8 @@ function encodeURIComponent($str) {
             <h1><?php echo $_GET["id"]; ?></h1>
         </div>
         <div class='formButtonBox formJustifyRight'>
-            <button class='formOkColor'>Add item</button>
-            <a href="./manage.php?id=<?php echo $_GET["id"]; ?>" ><button class='formInfoColor'>Manage</button></a>
+            <button class='formOkColor' id='addItemButton'>Add item</button>
+            <a href="./manageSheet.php?id=<?php echo rawurlencode($_GET["id"]) ?>"><button class='formInfoColor'>Manage</button></a>
         </div>
         </div>
     </header>
@@ -90,9 +91,12 @@ function encodeURIComponent($str) {
         echo "Invalid sheet.";
         return;
     }
+    echo "<datalist id='namesEscaped'>";
     foreach ($fieldsStmt->get_result() as $field) {
+        echo "<option value='" . rawurlencode($field["COLUMN_NAME"])."'></option>";
         $names[] = $field["COLUMN_NAME"];
     }
+    echo "</datalist>";
 
     //Generate header
     echo "<h1>Items</h1>";
@@ -165,7 +169,7 @@ function encodeURIComponent($str) {
     echo "</div>";
 
     //Generate header
-    echo "<h1>Who owes who</h1>";
+    echo "<h1 id='whoOwesWho'>Who owes who</h1>";
     if(!$viewOnly) {
         echo "<i>Click on cell to make payment.</i>";
     }
@@ -182,7 +186,7 @@ function encodeURIComponent($str) {
         echo "<th class='form-horizontal-header'>" . $row . "</th>";
         foreach($names as $col) {
             $val = (isset($whoOwesWho[$col][$row]) ? $whoOwesWho[$col][$row] : "0");
-            echo  "<td who-used='" . encodeURIComponent($col) . "' who-paid='" . encodeURIComponent($row) . "'  style='text-align:center' class='" . ($val == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $val . "</td>";
+            echo  "<td who-used='" . rawurlencode($col) . "' who-paid='" . rawurlencode($row) . "'  style='text-align:center' class='" . ($val == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $val . "</td>";
         }
         echo "</tr>";
     }
@@ -212,7 +216,7 @@ function encodeURIComponent($str) {
             if(bccomp($diff,"0") == -1) {
                 $diff = "0";
             }
-            echo  "<td who-used='" . encodeURIComponent($col) . "' who-paid='" . encodeURIComponent($row) . "' style='text-align:center' class='" . ($diff == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $diff . "</td>";
+            echo  "<td who-used='" . rawurlencode($col) . "' who-paid='" . rawurlencode($row) . "' style='text-align:center' class='" . ($diff == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $diff . "</td>";
         }
         echo "</tr>";
     }

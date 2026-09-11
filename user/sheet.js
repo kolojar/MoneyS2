@@ -7,4 +7,10 @@ for (const element of document.getElementsByClassName("timeFormat")) {
         hour12: false
     }).replace(',', ' ');
 }
+//Get names
+const names = [];
+for (const option of document.getElementById("namesEscaped").options) {
+    names.push(decodeURIComponent(option.value));
+}
+//
 //# sourceMappingURL=sheet.js.map
