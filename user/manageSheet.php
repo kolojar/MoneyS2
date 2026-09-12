@@ -38,7 +38,7 @@ if(isset($_POST["action"])) {
             //Change password
             $stmt = $conn->prepare("UPDATE `_tables` SET `password`=? WHERE id_tables=?");
             $id = ConvertFromBase62($_POST["id"]);
-            $password = password_hash($_POST["name"], PASSWORD_DEFAULT);
+            $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
             if(!$stmt->bind_param("si", $password, $id) || !$stmt->execute() || $stmt->affected_rows == 0 || !$stmt->close()) {
                 http_response_code(400);
                 echo "Error saving password!";
@@ -88,6 +88,12 @@ if(isset($_POST["action"])) {
 if(!isset($_GET["id"])) {
     http_response_code(400);
     echo "Missing ID parameter.";
+    die();
+}
+
+//Check access
+if(!CheckAccess($_GET["id"])) {
+    header("Location: ./login.php?id=" . $_GET["id"]);
     die();
 }
 

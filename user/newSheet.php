@@ -67,7 +67,7 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
             <p class="formHeader">Create new sheet</p>
             <form-input type="text" tabindex="1" label="Name" id="name" placeholder="Sheet name" minlength=1></form-input>
             <form-input type="password" tabindex="1" label="Password" id="password" placeholder="Password (optional)"></form-input>
-            <form-input type="text" tabindex="1" label="People" id="people" placeholder="john doe;jane doe;..." minlength=1></form-input>
+            <form-input type="textarea" tabindex="1" label="People" id="people" placeholder="john doe;jane doe;..." minlength=1></form-input>
             <div class="formButtonBoxHolder formCenter">
                 <button id="send" tabindex="3" class="formButton formOkColor">Create</button>
             </div>

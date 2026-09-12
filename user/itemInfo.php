@@ -242,6 +242,12 @@ if (!isset($_GET["id"])) {
     die();
 }
 
+//Check access
+if(!CheckAccess($_GET["id"])) {
+    header("Location: ./login.php?id=" . $_GET["id"]);
+    die();
+}
+
 //Get name
 $nameStmt = $conn->prepare("SELECT name, persons FROM `_tables` WHERE id_tables=?");
 $id = ConvertFromBase62($_GET["id"]);
