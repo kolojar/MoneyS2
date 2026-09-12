@@ -21,32 +21,7 @@ if (isset($_POST["action"])) {
     }
     $sheet = $_POST["sheet"];
     switch($_POST["action"]) {
-        case "archive": {
-            //TODO: Archive
-
-            //Run SQL
-            $stmt = $conn->prepare("UPDATE `tables` SET archived=1 WHERE name=?");
-            if(!$stmt->bind_param("s", $sheet) || !$stmt->execute() || $stmt->affected_rows == 0) {
-                http_response_code(400);
-                echo "Invalid sheet name.";
-                exit();
-            }
-            http_response_code(201);
-            echo "ok";
-            exit();
-        }
-        case "delete": {
-            //Run SQL
-            $stmt = $conn->prepare("DELETE FROM `tables` WHERE name=?");
-            if(!$stmt->bind_param("s", $sheet) || !$stmt->execute() || $stmt->affected_rows == 0) {
-                http_response_code(400);
-                echo "Invalid sheet name.";
-                exit();
-            }
-            http_response_code(201);
-            echo "ok";
-            exit();
-        }
+        
     }
 }
 ?>

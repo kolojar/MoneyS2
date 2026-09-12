@@ -12,5 +12,4 @@ const names = [];
 for (const option of document.getElementById("namesEscaped").options) {
     names.push(decodeURIComponent(option.value));
 }
-//
 //# sourceMappingURL=sheet.js.map

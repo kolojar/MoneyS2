@@ -12,5 +12,3 @@ const names = [];
 for (const option of (document.getElementById("namesEscaped") as HTMLDataListElement).options) {
   names.push(decodeURIComponent(option.value))
 }
-
-//

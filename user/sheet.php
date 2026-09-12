@@ -10,9 +10,9 @@ if(!isset($_GET["id"])) {
 }
 
 //Check if archived
-$archivedStmt = $conn->prepare("SELECT archived FROM `tables` WHERE name=?");
-$id = $_GET["id"];
-if(!$archivedStmt->bind_param("s", $id) || !$archivedStmt->execute() || !$archivedStmt->bind_result($isArchived) || !$archivedStmt->fetch() || !$archivedStmt->close()) {
+$archivedStmt = $conn->prepare("SELECT archived,name FROM `_tables` WHERE id_tables=?");
+$id =ConvertFromBase62($_GET["id"]);
+if(!$archivedStmt->bind_param("s", $id) || !$archivedStmt->execute() || !$archivedStmt->bind_result($isArchived, $name) || !$archivedStmt->fetch() || !$archivedStmt->close()) {
     http_response_code(400);
     echo "Invalid sheet.";
     die();
@@ -63,10 +63,10 @@ if (isset($_GET["viewOnly"])) {
     <header>
         <div class='formButtonBoxHolder'>
         <div class='formButtonBox'>
-            <h1><?php echo $_GET["id"]; ?></h1>
+            <h1><?php echo $name; ?></h1>
         </div>
         <div class='formButtonBox formJustifyRight'>
-            <button class='formOkColor' id='addItemButton'>Add item</button>
+            <a href="./itemInfo.php?id=<?php echo rawurlencode($_GET["id"]) ?>"><button class='formOkColor'>Add item</button></a>
             <a href="./manageSheet.php?id=<?php echo rawurlencode($_GET["id"]) ?>"><button class='formInfoColor'>Manage</button></a>
         </div>
         </div>
@@ -83,18 +83,17 @@ if (isset($_GET["viewOnly"])) {
 <?php function generateTables(bool $unfilledOnly, bool $viewOnly, mysqli $conn)
 {
     //Get names
-    $names = [];
-    $fieldsStmt = $conn->prepare("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = DATABASE() ORDER BY ORDINAL_POSITION LIMIT 18446744073709551615 OFFSET 8;");
-    $id = $_GET["id"];
-    if (!$fieldsStmt->bind_param("s", $id) || !$fieldsStmt->execute()) {
+    $fieldsStmt = $conn->prepare("SELECT persons FROM `_tables` WHERE id_tables=?");
+    $id = ConvertFromBase62($_GET["id"]);
+    if (!$fieldsStmt->bind_param("s", $id) || !$fieldsStmt->execute() || !$fieldsStmt->bind_result($namesRaw) || !$fieldsStmt->fetch() ||!$fieldsStmt->close()) {
         http_response_code(400);
-        echo "Invalid sheet.";
+        echo "Invalid sheet. A";
         return;
     }
+    $names = explode(";",$namesRaw);
     echo "<datalist id='namesEscaped'>";
-    foreach ($fieldsStmt->get_result() as $field) {
-        echo "<option value='" . rawurlencode($field["COLUMN_NAME"])."'></option>";
-        $names[] = $field["COLUMN_NAME"];
+    for ($i = 0; $i < count($names); $i++) {
+        echo "<option value='" . $i . "' name='" . rawurlencode($names[$i])."'></option>";
     }
     echo "</datalist>";
 
@@ -130,10 +129,10 @@ if (isset($_GET["viewOnly"])) {
     //Generate rows
     //Who used -> Who paid
     $whoOwesWho = [];
-    $valuesStmt = $conn->prepare("SELECT * FROM " . $_GET["id"]);
+    $valuesStmt = $conn->prepare("SELECT * FROM " .  $_GET["id"]);
     if (!$valuesStmt->execute()) {
         http_response_code(400);
-        echo "Invalid sheet.";
+        echo "Invalid sheet. B";
         return;
     }
     foreach ($valuesStmt->get_result() as $value) {

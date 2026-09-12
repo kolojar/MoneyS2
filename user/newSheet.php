@@ -2,7 +2,6 @@
 /** @var \mysqli $conn */
 require __DIR__ . "/../assets/config.php";
 session_start();
-$LETTERS = "0123456789abcdefghijklmnopqstuvwxyzABCDEFGHIJLKMNOPQERSTUVWXYZ";
 
 //Handle POST
 if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
@@ -16,21 +15,14 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
         echo "nah";
         die();
     }
-    $id = $stmt->insert_id;
-    $idCounter = $id;
+    //print($stmt->insert_id);
+    $id = ConvertToBase62($stmt->insert_id);
     $stmt->close();
 
-    //Encode table name
-    $nameEncoded = "";
-    do {
-        $nameEncoded = $LETTERS[$idCounter % 62] . $nameEncoded;
-        $idCounter = intdiv($$idCounter, 62);
-    } while ($idCounter > 0);
-
     //Create table
-    $query = "CREATE TABLE `" . $nameEncoded . "` (`id` INT AUTO_INCREMENT PRIMARY KEY, `when` DATETIME DEFAULT CURRENT_TIMESTAMP, `where` VARCHAR(255) NOT NULL, `who` TINYINT NOT NULL, `name` VARCHAR(255) NOT NULL, `cnt` TINYINT NOT NULL, `price` FLOAT NOT NULL, `link` INT";
+    $query = "CREATE TABLE `" . $id . "` (`id` INT AUTO_INCREMENT PRIMARY KEY, `when` DATETIME DEFAULT CURRENT_TIMESTAMP, `where` VARCHAR(255) NOT NULL, `who` TINYINT NOT NULL, `name` VARCHAR(255) NOT NULL, `cnt` TINYINT NOT NULL, `price` FLOAT NOT NULL, `link` INT";
     for ($i = 0; $i < count(explode(";", $people)); $i++) {
-        $query .= ", ` p" . $i . "` DECIMAL NOT NULL";
+        $query .= ", ` p" . $i . "` DECIMAL NOT NULL DEFAULT 0";
     }
 
     $query .= ") ENGINE=INNODB;";
@@ -40,6 +32,20 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
         echo "nah";
         die();
     }
+
+    //Add FULLTEXT indexes
+    if(!$conn->query("ALTER TABLE `" . $id . "` ADD FULLTEXT INDEX fulltext_where (`where`);")) {
+        http_response_code(500);
+        echo "nah";
+        die();
+    }
+    if(!$conn->query("ALTER TABLE `" . $id . "` ADD FULLTEXT INDEX fulltext_name (`name`);")) {
+        http_response_code(500);
+        echo "nah";
+        die();
+    }
+
+    //Done
     http_response_code(200);
     echo $id;
     die();
@@ -65,6 +71,7 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
             <div class="formButtonBoxHolder formCenter">
                 <button id="send" tabindex="3" class="formButton formOkColor">Create</button>
             </div>
+            <i>Note: Sepatate people with ;</i>
             <form-status-message></form-status-message>
         </form-box>
     </body>
@@ -79,6 +86,16 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
         let nameCnt = 2;
         const dialogManager = new FormDialogManager();
         document.getElementById("send").addEventListener("click", async () => {
+            //Validate
+            const [_1, ok1, _4] = await document.getElementById("name").validate();
+            const [_2, ok2, _5] = await document.getElementById("password").validate();
+            const [_3, ok3, _6] = await document.getElementById("people").validate();
+            if(!ok1 || !ok2 || !ok3) {
+              SendToast("Create new sheet","Input contains invalid data!", "error");
+              return
+            }
+
+            //Send to server
             SetWaitStatusForms("Sending data to server, please wait...");
             const data = new FormData();
             data.append("name", document.getElementById("name").value);
@@ -92,8 +109,8 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
             } else {
                 SendToast("Server responce", res, "error");
                 setTimeout(async () => {
-                    await dialogManager.ShowAlertAsync("Login to Admin", "Failed creating sheet, please try it again.");
-                    window.location.reload();
+                    await dialogManager.ShowAlertAsync("Create new sheet", "Failed creating sheet, please try it again.");
+                    //window.location.reload();
                 }, 1000);
             }
         });
