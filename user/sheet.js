@@ -16,6 +16,17 @@ for (const element of document.getElementsByClassName("timeFormat")) {
     })
         .replace(",", " ");
 }
+//Format time
+for (const element of document.getElementsByClassName("dateFormat")) {
+    element.innerHTML = new Date(element.innerHTML)
+        .toLocaleString(navigator.languages[0], {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour12: false,
+    })
+        .replace(",", " ");
+}
 //Delete buttons
 for (const button of document.getElementsByClassName("btnDelete")) {
     button.addEventListener("click", async () => {

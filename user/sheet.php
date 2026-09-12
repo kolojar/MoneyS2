@@ -130,6 +130,10 @@ if (isset($_GET["viewOnly"])) {
     //Generate rows
     //Who used -> Who paid
     $whoOwesWho = [];
+    //Day -> Where -> Who = amount
+    $stats = [];
+    //Place -> Who -> Price
+    $places = [];
     $valuesStmt = $conn->prepare("SELECT * FROM " .  $_GET["id"]);
     if (!$valuesStmt->execute()) {
         http_response_code(400);
@@ -151,6 +155,7 @@ if (isset($_GET["viewOnly"])) {
             echo "<button fid='" . $value["id"] . "' class='formOkColor btnAddLink formButtonInline'>Add link</button>";
         }
         echo "</td>";
+        $places[$value["where"]][$names[$value["who"]]] = bcadd($places[$value["where"]][$names[$value["who"]]], bcmul($value["cnt"], $value["price"]));
         for ($i = 0; $i<count($names);$i++) {
             echo "<td max='" . $value["cnt"] . "' name='" . $i . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value["p".$i]) ? rtrim(rtrim($value["p".$i],"0")?:"0",".")?:"0" : "0") . "</td>";
         }
@@ -159,6 +164,7 @@ if (isset($_GET["viewOnly"])) {
             $diff = bcmul(isset($value["p".$i]) ? $value["p".$i] : "0", $value["price"]);
             echo "<td>" . $diff . "</td>";
             $whoOwesWho[$name][$names[$value["who"]]] = bcadd(isset($whoOwesWho[$name][$names[$value["who"]]]) ? $whoOwesWho[$name][$names[$value["who"]]] : "0", $diff);
+            $stats[explode(" ",$value["when"])[0]][$value["where"]][$name] = bcadd($stats[explode(" ",$value["when"])[0]][$value["where"]][$name], $diff);
             $i++;
         }
         echo "<td class='formButtonBoxTable'>";
@@ -224,6 +230,82 @@ if (isset($_GET["viewOnly"])) {
         }
         echo "</tr>";
     }
+    echo "</table>";
+    echo "</div>";
+
+    //Generate days
+    echo "<h1>Info per day</h1>";
+    foreach($stats as $day => $dayInfo) {
+        echo "<h2 class='dateFormat'>" . $day . "</h2>";
+        echo "<div class='tableScrollHolder'>";
+        echo "<table class='styledTable styledTableNoWrap'>";
+        echo "<tr>";
+        echo "<th class='form-topleft-header'>Place</th>";
+        foreach($names as $name) {
+            echo "<th>" . $name ."</th>";
+        }
+        echo "<th>Total</th>";
+        echo "</tr>";
+        $nameSum = [];
+        foreach($dayInfo as $where => $placeInfo) {
+            if($where == "BANK") {continue;}
+            echo "<tr>";
+            echo "<th class='form-horizontal-header'>" . $where . "</th>";
+            $placeSum = "0";
+            foreach($names as $name) {
+                echo "<td>" .$placeInfo[$name] . "</td>";
+                $placeSum = bcadd($placeSum,$placeInfo[$name]);
+                $nameSum[$name] = bcadd($nameSum[$name],$placeInfo[$name]);
+            }
+            echo "<td>" . $placeSum . "</td>";
+            echo "</tr>";
+        }
+        echo "<tr>";
+        echo "<th class='form-horizontal-header'>Sum:</th>";
+        $total = "0";
+        foreach($names as $name) {
+            echo "<td>" . $nameSum[$name] . "</td>";
+            $total = bcadd($total, $nameSum[$name]);
+        }
+        echo "<td>" . $total . "</td>";
+        echo "</tr>";
+        echo "</table>";
+        echo "</div>";
+    }
+
+    //Generate places summary
+    echo "<h1>Info per place</h1>";
+    echo "<div class='tableScrollHolder'>";
+    echo "<table class='styledTable styledTableNoWrap'>";
+    echo "<tr>";
+    echo "<th class='form-topleft-header'>Place</th>";
+    foreach($names as $name) {
+        echo "<th>" . $name ."</th>";
+    }
+    echo "<th>Total</th>";
+    echo "</tr>";
+    echo "<tr>";
+    $nameSum = [];
+    foreach($places as $where => $placeInfo) {
+        if($where == "BANK") {continue;}
+        echo "<th class='form-horizontal-header'>" . $where . "</th>";
+        $rowSum = "0";
+        foreach($names as $name) {
+            echo "<td>" . $placeInfo[$name] . "</td>";
+            $rowSum = bcadd($rowSum, $placeInfo[$name]);
+            $nameSum[$name] = bcadd($nameSum[$name], $placeInfo[$name]);
+        }
+        echo "<td>" . $rowSum. "</td>";
+        echo "</tr>";
+    }
+    echo "<th class='form-horizontal-header'>Sum:</th>";
+    $total = "0";
+    foreach($names as $name) {
+        echo "<td>" . $nameSum[$name] . "</td>";
+        $total = bcadd($total, $nameSum[$name]);
+    }
+    echo "<td>" . $total . "</td>";
+    echo "</tr>";
     echo "</table>";
     echo "</div>";
 }
