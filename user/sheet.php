@@ -100,7 +100,7 @@ if (isset($_GET["viewOnly"])) {
     //Generate header
     echo "<h1>Items</h1>";
     if(!$viewOnly) {
-        echo "<i>Click on cell to edit it's value.</i>";
+        echo "<i>Click on used amount cell to edit it's value.</i>";
     }
     echo "<div class='tableScrollHolder'>";
     echo "<table class='styledTable styledTableNoWrap'>";
@@ -137,12 +137,12 @@ if (isset($_GET["viewOnly"])) {
     }
     foreach ($valuesStmt->get_result() as $value) {
         echo "<tr id='row'" . $value["id"] . ">";
-        echo "<td fid='" . $value["id"] . "' class='timeFormat mouseField fieldWhen'>" . $value["when"] . "</td>";
-        echo "<td fid='" . $value["id"] . "' class='mouseField fieldWhere'>" . $value["where"] . "</td>";
-        echo "<td fid='" . $value["id"] . "' class='mouseField fieldWho'>" . $names[$value["who"]] . "</td>";
-        echo "<td fid='" . $value["id"] . "' class='mouseField fieldName'>" . $value["name"] . "</td>";
-        echo "<td fid='" . $value["id"] . "' class='mouseField fieldCount'>" . $value["cnt"] . "</td>";
-        echo "<td fid='" . $value["id"] . "' class='mouseField fieldPrice'>" . $value["price"] . "</td>";
+        echo "<td class='timeFormat'>" . $value["when"] . "</td>";
+        echo "<td>" . $value["where"] . "</td>";
+        echo "<td>" . $names[$value["who"]] . "</td>";
+        echo "<td>" . $value["name"] . "</td>";
+        echo "<td>" . $value["cnt"] . "</td>";
+        echo "<td>" . $value["price"] . "</td>";
         echo "<td class='formButtonBoxTable'>";
         if ($value["link"] != null) {
             echo "<a href='#row'" . $value["link"] . "><button class='formInfoColor formButtonInline'>Jump to link</button></a>";
@@ -160,6 +160,7 @@ if (isset($_GET["viewOnly"])) {
         }
         echo "<td class='formButtonBoxTable'>";
         echo "<button fid='" . $value["id"] . "' class='formWarnColor btnSplitMoney formButtonInline'>Split money</button>";
+        echo "<a href='./itemInfo.php?id=" . $_GET["id"] . "&item=" .  $value["id"] . "'><button class='formInfoColor formButtonInline'>Edit</button></a>";
         echo "<button fid='" . $value["id"] . "' class='formErrorColor btnDelete formButtonInline'>Delete</button>";
         echo "</td>";
         echo "</tr>";

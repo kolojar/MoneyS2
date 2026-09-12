@@ -11,6 +11,7 @@ const who = document.getElementById("who") as HTMLFormInputElement;
 const name = document.getElementById("name") as HTMLFormInputElement;
 const count = document.getElementById("count") as HTMLFormInputElement;
 const price = document.getElementById("price") as HTMLFormInputElement;
+when.SetDateTimeLocal(new Date(when.getAttribute("valueTime") as string + " UTC"))
 
 //Where search
 where.addEventListener("search", async () => {

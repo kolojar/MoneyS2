@@ -53,72 +53,20 @@ if(isset($_POST["search"])) {
 //Handle POST
 if(isset($_POST["action"])) {
     switch($_POST["action"]) {
-        case "changeName": {
-            //Validate
-            if(!isset($_POST["id"]) || !isset($_POST["name"])) {
-                http_response_code(400);
-                echo "Missing parameters!";
-                die();
-            }
-
-            //Change name
-            $stmt = $conn->prepare("UPDATE `_tables` SET `name`=? WHERE id_tables=?");
-            $id = ConvertFromBase62($_POST["id"]);
-            $name = $_POST["name"];
-            if(!$stmt->bind_param("si", $name, $id) || !$stmt->execute() || $stmt->affected_rows == 0 || !$stmt->close()) {
-                http_response_code(400);
-                echo "Error saving name!";
-                die();
-            }
-            http_response_code(200);
-            echo "Name saved.";
-            die();
-        }
-        case "changePassword": {
-            //Validate
-            if(!isset($_POST["id"]) || !isset($_POST["password"])) {
-                http_response_code(400);
-                echo "Missing parameters!";
-                die();
-            }
-
-            //Change password
-            $stmt = $conn->prepare("UPDATE `_tables` SET `password`=? WHERE id_tables=?");
-            $id = ConvertFromBase62($_POST["id"]);
-            $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
-            if(!$stmt->bind_param("si", $password, $id) || !$stmt->execute() || $stmt->affected_rows == 0 || !$stmt->close()) {
-                http_response_code(400);
-                echo "Error saving password!";
-                die();
-            }
-            http_response_code(200);
-            echo "Password saved.";
-            die();
-        }
-        case "archive": {
-            //TODO: Archive
-
-            //Run SQL
-            $id = ConvertFromBase62($_POST["id"]);
-            $stmt = $conn->prepare("UPDATE `tables` SET archived=1 WHERE id_tables=?");
-            if(!$stmt->bind_param("i", $id) || !$stmt->execute() || $stmt->affected_rows == 0 || !$stmt->close()) {
-                http_response_code(400);
-                echo "Error archiving sheet.";
-                exit();
-            }
-            http_response_code(201);
-            echo "ok";
-            exit();
-        }
         case "delete": {
-            //TODO: Delete
+            //Validate
+            if(!isset($_POST["id"]) || !isset($_POST["item"])) {
+                http_response_code(400);
+                echo "Missing parameters!";
+                die();
+            }
 
             //Run SQL
-            $id = ConvertFromBase62($_POST["id"]);
-            $stmt = $conn->prepare("DELETE FROM `tables` WHERE id_tables=?");
-            if(!$stmt->bind_param("i", $id) || !$stmt->execute() || $stmt->affected_rows == 0) {
+            $item = $_POST["item"];
+            $stmt = $conn->prepare("DELETE FROM `" . $_POST["id"] . "` WHERE id=?");
+            if(!$stmt->bind_param("i", $item) || !$stmt->execute() || $stmt->affected_rows == 0) {
                 http_response_code(400);
-                echo "Error deleting sheet.";
+                echo "Error deleting item.";
                 exit();
             }
             http_response_code(201);
@@ -212,9 +160,24 @@ $tableId = ConvertFromBase62($_GET["id"]);
     </head>
     <body class="formBackground" form-box-holder>
         <form-box>
+            <?php
+                if(isset($_GET["item"])) {
+                    //Get info
+                    $stmt = $conn->prepare("SELECT * FROM `" . $_GET["id"] . "` WHERE id=?");
+                    $item = $_GET["item"];
+                    if(!$stmt->bind_param("i", $item) || !$stmt->execute()) {
+                        http_response_code(400);
+                        echo "Invalid item id.";
+                        die();
+                    }
+                    $info = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                }
+            ?>
+
             <p class="formHeader"><?php echo (isset($_GET["item"])) ? "Manage" : "Add" ?> item</p>
-            <form-input id="when" tabindex=1 minlength=1 label="When:" type="datetime-local" placeholder="When"></form-input>
-            <form-input id="where"  tabindex=2 minlength=1 label="Where:" type="search-realtime" placeholder="Where"></form-input>
+            <form-input id="when" tabindex=1 minlength=1 label="When:" type="datetime-local" placeholder="When" valueTime="<?php echo $info['when'] ?>"></form-input>
+            <form-input id="where"  tabindex=2 minlength=1 label="Where:" type="search-realtime" placeholder="Where" value="<?php echo $info['where'] ?>"></form-input>
             <datalist id="places">
                 <?php
                     $tableId = ConvertFromBase62($_GET["id"]);
@@ -222,9 +185,10 @@ $tableId = ConvertFromBase62($_GET["id"]);
                     while ($row = $result->fetch_assoc()) {
                         echo '<option label="' . $row["where"] . '" value="' . $row["where"] .'"></option>';
                     }
+                    $result->close()
                 ?>
             </datalist>
-            <form-input id="who"  tabindex=3 label="Who:" type="select" placeholder="Who" list="userNames"></form-input>
+            <form-input id="who"  tabindex=3 label="Who:" type="select" placeholder="Who" list="userNames" value="<?php echo $info['who'] ?>"></form-input>
             <datalist id="userNames">
                 <?php
                     $stmt = $conn->prepare("SELECT persons FROM _tables WHERE id_tables = ?");
@@ -239,9 +203,9 @@ $tableId = ConvertFromBase62($_GET["id"]);
                     }
                 ?>
             </datalist>
-            <form-input id="name"  tabindex=4 minlength=1 label="Name of item:" type="search-realtime" placeholder="Name of item"></form-input>
-            <form-input id="count"  tabindex=5 min=1 minlength=1 label="Count:" type="number" placeholder="Count"></form-input>
-            <form-input id="price"  tabindex=6 minlength=1 label="Price per item:" type="number" step=0.01 placeholder="Price per item"></form-input>
+            <form-input id="name"  tabindex=4 minlength=1 label="Name of item:" type="search-realtime" placeholder="Name of item" value="<?php echo $info['name'] ?>"></form-input>
+            <form-input id="count"  tabindex=5 min=1 minlength=1 label="Count:" type="number" placeholder="Count" value="<?php echo $info['cnt'] ?>"></form-input>
+            <form-input id="price"  tabindex=6 minlength=1 label="Price per item:" type="number" step=0.01 placeholder="Price per item" value="<?php echo $info['price'] ?>"></form-input>
             <div class='formButtonBoxHolder'>
                 <div class="formJustifyLeft">
                     <a  tabindex=11 href='./sheet.php?id=<?php echo $_GET["id"];?>'><button class="formErrorColor">Exit</button></a>

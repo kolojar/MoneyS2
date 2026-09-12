@@ -11,6 +11,7 @@ const who = document.getElementById("who");
 const name = document.getElementById("name");
 const count = document.getElementById("count");
 const price = document.getElementById("price");
+when.SetDateTimeLocal(new Date(when.getAttribute("valueTime") + " UTC"));
 //Where search
 where.addEventListener("search", async () => {
     const timestamp = new Date();

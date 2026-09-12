@@ -7,6 +7,13 @@ session_start();
 if(isset($_POST["action"])) {
     switch($_POST["action"]) {
         case "changeName": {
+            //Validate
+            if(!isset($_POST["id"]) || !isset($_POST["name"])) {
+                http_response_code(400);
+                echo "Missing parameters!";
+                die();
+            }
+
             //Change name
             $stmt = $conn->prepare("UPDATE `_tables` SET `name`=? WHERE id_tables=?");
             $id = ConvertFromBase62($_POST["id"]);
@@ -21,7 +28,14 @@ if(isset($_POST["action"])) {
             die();
         }
         case "changePassword": {
-            //Change name
+            //Validate
+            if(!isset($_POST["id"]) || !isset($_POST["password"])) {
+                http_response_code(400);
+                echo "Missing parameters!";
+                die();
+            }
+
+            //Change password
             $stmt = $conn->prepare("UPDATE `_tables` SET `password`=? WHERE id_tables=?");
             $id = ConvertFromBase62($_POST["id"]);
             $password = password_hash($_POST["name"], PASSWORD_DEFAULT);
