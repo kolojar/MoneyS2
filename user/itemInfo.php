@@ -29,14 +29,24 @@ if (isset($_POST["search"])) {
     //Run SQL
     $search = $_POST["search"];
     $sheet = $_POST["id"];
-    $value = $_POST["value"];
-    $stmt = $conn->prepare("SELECT t.`$search` FROM `$sheet` t WHERE MATCH(`$search`) AGAINST(? IN BOOLEAN MODE) LIMIT 20");
-    if (!$stmt->bind_param("s", $value) || !$stmt->execute()) {
-        http_response_code(400);
-        echo "Invalid MySQL error!";
-        die();
+    $value = $_POST["value"] . "*";
+    $value2 = $_POST["value"] . "%";
+    //$value2 = "%" . $_POST["value"] . "%";
+    if ($value == "*") {
+        $stmt = $conn->prepare("SELECT t.`$search`, COUNT(t.`$search`) AS c FROM `$sheet` t GROUP BY t.`$search` ORDER BY c DESC LIMIT 20");
+        if (!$stmt->execute()) {
+            http_response_code(400);
+            echo "Invalid MySQL error!";
+            die();
+        }
+    } else {
+        $stmt = $conn->prepare("SELECT t.`$search`, COUNT(t.`$search`) AS c FROM `$sheet` t WHERE MATCH(t.`$search`) AGAINST(? IN BOOLEAN MODE) OR t.`$search` LIKE ? GROUP BY t.`$search` ORDER BY c DESC LIMIT 20");
+        if (!$stmt->bind_param("ss", $value, $value2) || !$stmt->execute()) {
+            http_response_code(400);
+            echo "Invalid MySQL error!";
+            die();
+        }
     }
-
     //Convert to JSON
     $result = $stmt->get_result();
     $values = [];
@@ -207,20 +217,20 @@ if (isset($_POST["action"])) {
             http_response_code(201);
             echo "ok";
             exit();
-        case "pay": {
+        case "pay":
             //Validate
-            if (!isset($_POST["id"]) || !isset($_POST["from"]) || !isset($_POST["to"]) || !isset($_POST["amount"])|| !isset($_POST["name"])) {
+            if (!isset($_POST["id"]) || !isset($_POST["from"]) || !isset($_POST["to"]) || !isset($_POST["amount"]) || !isset($_POST["name"])) {
                 http_response_code(400);
                 echo "Missing parameters!";
                 die();
             }
 
             //Run SQL
-            $stmt = $conn->prepare("INSERT INTO `" . $_POST["id"] . "`(`where`, `who`, `name`, `cnt`, `price`,`p" .$_POST["to"] . "`) VALUES ('BANK',?,?,?,1,?)");
+            $stmt = $conn->prepare("INSERT INTO `" . $_POST["id"] . "`(`where`, `who`, `name`, `cnt`, `price`,`p" . $_POST["to"] . "`) VALUES ('BANK',?,?,?,1,?)");
             $who = $_POST["from"];
             $name = $_POST["name"];
             $cnt = $_POST["amount"];
-            if (!$stmt->bind_param("ssss",$who, $name, $cnt, $cnt) || !$stmt->execute() || !$stmt->close()) {
+            if (!$stmt->bind_param("ssss", $who, $name, $cnt, $cnt) || !$stmt->execute() || !$stmt->close()) {
                 http_response_code(400);
                 echo "Error saving payment.";
                 exit();
@@ -228,7 +238,6 @@ if (isset($_POST["action"])) {
             http_response_code(201);
             echo "ok";
             exit();
-        }
     }
     http_response_code(400);
     echo "Missing action parameter.";
@@ -243,7 +252,7 @@ if (!isset($_GET["id"])) {
 }
 
 //Check access
-if(!CheckAccess($_GET["id"])) {
+if (!CheckAccess($_GET["id"])) {
     header("Location: ./login.php?id=" . $_GET["id"]);
     die();
 }
@@ -270,7 +279,7 @@ $tableId = ConvertFromBase62($_GET["id"]);
         <meta name="form-icons-main-db" content="../formWebScripts/formIcons.json" />
     </head>
     <body class="formBackground" form-box-holder>
-        <form-box>
+        <form-box class='formBoxScrollContent'>
             <?php if (isset($_GET["item"])) {
                 //Get info
                 $stmt = $conn->prepare("SELECT * FROM `" . $_GET["id"] . "` WHERE id=?");
@@ -314,7 +323,7 @@ $tableId = ConvertFromBase62($_GET["id"]);
             </datalist>
             <form-input id="name"  tabindex=4 minlength=1 label="Name of item:" type="search-realtime" placeholder="Name of item" value="<?php echo $info["name"]; ?>"></form-input>
             <form-input id="count"  tabindex=5 min=1 minlength=1 label="Count:" type="number" placeholder="Count" value="<?php echo $info["cnt"]; ?>"></form-input>
-            <form-input id="price"  tabindex=6 minlength=1 label="Price per item:" type="number" step=0.01 placeholder="Price per item" value="<?php echo $info["price"]; ?>"></form-input>
+            <form-input id="price"  tabindex=6 minlength=1 label="Price per item:" type="number" step=0.001 placeholder="Price per item" value="<?php echo $info["price"]; ?>"></form-input>
             <div class='formButtonBoxHolder'>
                 <div class="formJustifyLeft">
                     <a  tabindex=11 href='./sheet.php?id=<?php echo $_GET["id"]; ?>'><button class="formErrorColor">Exit</button></a>

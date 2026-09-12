@@ -112,10 +112,10 @@ if (isset($_GET["viewOnly"])) {
     echo "<div class='tableScrollHolder'>";
     echo "<table class='styledTable styledTableNoWrap'>";
     echo "<tr>";
+    echo "<th rowspan=2>Actions</th>";
     echo "<th colspan=7>Item info</th>";
     echo "<th colspan=" . count($names) . ">Used count</th>";
     echo "<th colspan=" . count($names) . ">Used price</th>";
-    echo "<th rowspan=2>Actions</th>";
     echo "</tr>";
     echo "<tr>";
     echo "<th>When</th>";
@@ -148,6 +148,11 @@ if (isset($_GET["viewOnly"])) {
     }
     foreach ($valuesStmt->get_result() as $value) {
         echo "<tr id='row'" . $value["id"] . ">";
+        echo "<td class='formButtonBoxTable'>";
+        echo "<button fid='" . $value["id"] . "' class='formWarnColor btnSplitMoney formButtonInline'>Split money</button>";
+        echo "<a href='./itemInfo.php?id=" . $_GET["id"] . "&item=" .  $value["id"] . "'><button class='formInfoColor formButtonInline'>Edit</button></a>";
+        echo "<button fid='" . $value["id"] . "' class='formErrorColor btnDelete formButtonInline'>Delete</button>";
+        echo "</td>";
         echo "<td class='timeFormat'>" . $value["when"] . "</td>";
         echo "<td>" . $value["where"] . "</td>";
         echo "<td>" . $names[$value["who"]] . "</td>";
@@ -163,21 +168,16 @@ if (isset($_GET["viewOnly"])) {
         echo "</td>";
         $places[$value["where"]][$names[$value["who"]]] = bcadd($places[$value["where"]][$names[$value["who"]]], bcmul($value["cnt"], $value["price"]));
         for ($i = 0; $i<count($names);$i++) {
-            echo "<td max='" . $value["cnt"] . "' name='" . $i . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value["p".$i]) ? rtrim(rtrim($value["p".$i],"0")?:"0",".")?:"0" : "0") . "</td>";
+            echo "<td style='text-align:center' max='" . $value["cnt"] . "' name='" . $i . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value["p".$i]) ? rtrim(rtrim($value["p".$i],"0")?:"0",".")?:"0" : "0") . "</td>";
         }
         $i = 0;
         foreach ($names as $name) {
             $diff = bcmul(isset($value["p".$i]) ? $value["p".$i] : "0", $value["price"]);
-            echo "<td>" . $diff . "</td>";
+            echo "<td style='text-align:center'>" . $diff . "</td>";
             $whoOwesWho[$name][$names[$value["who"]]] = bcadd(isset($whoOwesWho[$name][$names[$value["who"]]]) ? $whoOwesWho[$name][$names[$value["who"]]] : "0", $diff);
             $stats[explode(" ",$value["when"])[0]][$value["where"]][$name] = bcadd($stats[explode(" ",$value["when"])[0]][$value["where"]][$name], $diff);
             $i++;
         }
-        echo "<td class='formButtonBoxTable'>";
-        echo "<button fid='" . $value["id"] . "' class='formWarnColor btnSplitMoney formButtonInline'>Split money</button>";
-        echo "<a href='./itemInfo.php?id=" . $_GET["id"] . "&item=" .  $value["id"] . "'><button class='formInfoColor formButtonInline'>Edit</button></a>";
-        echo "<button fid='" . $value["id"] . "' class='formErrorColor btnDelete formButtonInline'>Delete</button>";
-        echo "</td>";
         echo "</tr>";
     }
     echo "</table>";
@@ -259,21 +259,21 @@ if (isset($_GET["viewOnly"])) {
             echo "<th class='form-horizontal-header'>" . $where . "</th>";
             $placeSum = "0";
             foreach($names as $name) {
-                echo "<td>" .$placeInfo[$name] . "</td>";
+                echo "<td style='text-align:center'>" .$placeInfo[$name] . "</td>";
                 $placeSum = bcadd($placeSum,$placeInfo[$name]);
                 $nameSum[$name] = bcadd($nameSum[$name],$placeInfo[$name]);
             }
-            echo "<td>" . $placeSum . "</td>";
+            echo "<td style='text-align:center'>" . $placeSum . "</td>";
             echo "</tr>";
         }
         echo "<tr>";
         echo "<th class='form-horizontal-header'>Sum:</th>";
         $total = "0";
         foreach($names as $name) {
-            echo "<td>" . $nameSum[$name] . "</td>";
+            echo "<td style='text-align:center'>" . $nameSum[$name] . "</td>";
             $total = bcadd($total, $nameSum[$name]);
         }
-        echo "<td>" . $total . "</td>";
+        echo "<td style='text-align:center'>" . $total . "</td>";
         echo "</tr>";
         echo "</table>";
         echo "</div>";
@@ -297,20 +297,20 @@ if (isset($_GET["viewOnly"])) {
         echo "<th class='form-horizontal-header'>" . $where . "</th>";
         $rowSum = "0";
         foreach($names as $name) {
-            echo "<td>" . $placeInfo[$name] . "</td>";
+            echo "<td style='text-align:center'>" . (isset($placeInfo[$name]) ? $placeInfo[$name] : "0.000") . "</td>";
             $rowSum = bcadd($rowSum, $placeInfo[$name]);
             $nameSum[$name] = bcadd($nameSum[$name], $placeInfo[$name]);
         }
-        echo "<td>" . $rowSum. "</td>";
+        echo "<td style='text-align:center'>" . $rowSum. "</td>";
         echo "</tr>";
     }
     echo "<th class='form-horizontal-header'>Sum:</th>";
     $total = "0";
     foreach($names as $name) {
-        echo "<td>" . $nameSum[$name] . "</td>";
+        echo "<td style='text-align:center'>" . (isset($nameSum[$name])? $nameSum[$name] :"0.000") . "</td>";
         $total = bcadd($total, $nameSum[$name]);
     }
-    echo "<td>" . $total . "</td>";
+    echo "<td style='text-align:center'>" . $total . "</td>";
     echo "</tr>";
     echo "</table>";
     echo "</div>";

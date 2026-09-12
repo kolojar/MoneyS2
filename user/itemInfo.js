@@ -20,8 +20,11 @@ where.addEventListener("search", async () => {
     data.set("id", params.get("id"));
     data.set("value", where.valueRaw);
     const [ok, msg] = await SendPOSTDataToServerAsync("./itemInfo.php", data);
-    where.setOptions(JSON.parse(msg), timestamp);
+    if (ok) {
+        where.setOptions(JSON.parse(msg), timestamp);
+    }
 });
+where.dispatchEvent(new Event("search"));
 //Name search
 name.addEventListener("search", async () => {
     const timestamp = new Date();
@@ -30,8 +33,11 @@ name.addEventListener("search", async () => {
     data.set("id", params.get("id"));
     data.set("value", name.valueRaw);
     const [ok, msg] = await SendPOSTDataToServerAsync("./itemInfo.php", data);
-    name.setOptions(JSON.parse(msg), timestamp);
+    if (ok) {
+        name.setOptions(JSON.parse(msg), timestamp);
+    }
 });
+name.dispatchEvent(new Event("search"));
 //Clear button
 (_m = document.getElementById("btnClear")) === null || _m === void 0 ? void 0 : _m.addEventListener("click", async () => {
     //Confirm

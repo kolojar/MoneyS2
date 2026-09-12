@@ -64,15 +64,15 @@ for (const button of document.getElementsByClassName("btnDelete")) {
 //Prepare names for checkboxes
 const namesCheckboxes = new Map<string, FormDialogCheckboxSelectData<number>>();
 for (const option of (document.getElementById("namesEscaped") as HTMLDataListElement).options) {
-  namesCheckboxes.set(option.getAttribute("label") as string, {value:parseInt(option.getAttribute("value") as string), checked: true })
+  namesCheckboxes.set(decodeURIComponent( option.getAttribute("label") as string), {value:parseInt(option.getAttribute("value") as string), checked: true })
 }
 
 //Split money button
 for (const button of document.getElementsByClassName("btnSplitMoney")) {
   button.addEventListener("click", async () => {
     //Select names
-    let result = await GlobalDialogManager.ShowCheckboxSelectAsync<number>("Split money", "Select names to slit with:", 0, namesCheckboxes);
-    if (result == 0 || (result as number[]).length == 0) {
+    let result = await GlobalDialogManager.ShowCheckboxSelectAsync<number>("Split money", "Select names to slit with:", -1, namesCheckboxes);
+    if (result == -1 || (result as number[]).length == 0) {
       SendToast("Split money", "Action cancelled!", "info");
       return
     }

@@ -58,14 +58,14 @@ for (const button of document.getElementsByClassName("btnDelete")) {
 //Prepare names for checkboxes
 const namesCheckboxes = new Map();
 for (const option of document.getElementById("namesEscaped").options) {
-    namesCheckboxes.set(option.getAttribute("label"), { value: parseInt(option.getAttribute("value")), checked: true });
+    namesCheckboxes.set(decodeURIComponent(option.getAttribute("label")), { value: parseInt(option.getAttribute("value")), checked: true });
 }
 //Split money button
 for (const button of document.getElementsByClassName("btnSplitMoney")) {
     button.addEventListener("click", async () => {
         //Select names
-        let result = await GlobalDialogManager.ShowCheckboxSelectAsync("Split money", "Select names to slit with:", 0, namesCheckboxes);
-        if (result == 0 || result.length == 0) {
+        let result = await GlobalDialogManager.ShowCheckboxSelectAsync("Split money", "Select names to slit with:", -1, namesCheckboxes);
+        if (result == -1 || result.length == 0) {
             SendToast("Split money", "Action cancelled!", "info");
             return;
         }
