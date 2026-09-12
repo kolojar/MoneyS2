@@ -20,9 +20,9 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
     $stmt->close();
 
     //Create table
-    $query = "CREATE TABLE `" . $id . "` (`id` INT AUTO_INCREMENT PRIMARY KEY, `when` DATETIME DEFAULT CURRENT_TIMESTAMP, `where` VARCHAR(255) NOT NULL, `who` TINYINT NOT NULL, `name` VARCHAR(255) NOT NULL, `cnt` TINYINT NOT NULL, `price` FLOAT NOT NULL, `link` INT";
+    $query = "CREATE TABLE `" . $id . "` (`id` INT AUTO_INCREMENT PRIMARY KEY, `when` DATETIME DEFAULT CURRENT_TIMESTAMP, `where` VARCHAR(255) NOT NULL, `who` TINYINT NOT NULL, `name` VARCHAR(255) NOT NULL, `cnt` TINYINT NOT NULL, `price` DECIMAL(18,3) NOT NULL, `link` INT";
     for ($i = 0; $i < count(explode(";", $people)); $i++) {
-        $query .= ", ` p" . $i . "` DECIMAL NOT NULL DEFAULT 0";
+        $query .= ", `p" . $i . "` DECIMAL(9,3) NOT NULL DEFAULT 0";
     }
 
     $query .= ") ENGINE=INNODB;";

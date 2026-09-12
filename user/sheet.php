@@ -38,6 +38,7 @@ if (isset($_GET["viewOnly"])) {
         <link rel="stylesheet" href="../formWebScripts/css/formStyle.css" />
         <link rel="stylesheet" href="../assets/style.css" />
         <meta name="form-icons-main-db" content="../formWebScripts/formIcons.json" />
+        <meta name="form-locales-main" content="../formWebScripts/locales/" />
     </head>
     <style>
     th {
@@ -93,7 +94,7 @@ if (isset($_GET["viewOnly"])) {
     $names = explode(";",$namesRaw);
     echo "<datalist id='namesEscaped'>";
     for ($i = 0; $i < count($names); $i++) {
-        echo "<option value='" . $i . "' name='" . rawurlencode($names[$i])."'></option>";
+        echo "<option value='" . $i . "' label='" . rawurlencode($names[$i])."'></option>";
     }
     echo "</datalist>";
 
@@ -150,13 +151,15 @@ if (isset($_GET["viewOnly"])) {
             echo "<button fid='" . $value["id"] . "' class='formOkColor btnAddLink formButtonInline'>Add link</button>";
         }
         echo "</td>";
-        foreach ($names as $name) {
-            echo "<td name='" . $name . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value[$name]) ? $value[$name] : "0") . "</td>";
+        for ($i = 0; $i<count($names);$i++) {
+            echo "<td name='" . $i . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value["p".$i]) ? rtrim(rtrim($value["p".$i],"0")?:"0",".")?:"0" : "0") . "</td>";
         }
+        $i = 0;
         foreach ($names as $name) {
-            $diff = bcmul(isset($value[$name]) ? $value[$name] : "0", $value["price"]);
+            $diff = bcmul(isset($value["p".$i]) ? $value["p".$i] : "0", $value["price"]);
             echo "<td>" . $diff . "</td>";
             $whoOwesWho[$name][$names[$value["who"]]] = bcadd(isset($whoOwesWho[$name][$names[$value["who"]]]) ? $whoOwesWho[$name][$names[$value["who"]]] : "0", $diff);
+            $i++;
         }
         echo "<td class='formButtonBoxTable'>";
         echo "<button fid='" . $value["id"] . "' class='formWarnColor btnSplitMoney formButtonInline'>Split money</button>";

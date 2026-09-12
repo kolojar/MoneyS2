@@ -124,6 +124,46 @@ if(isset($_POST["action"])) {
             echo "ok";
             exit();
         }
+        case "splitMoney": {
+            //Validate
+            if(!isset($_POST["id"]) || !isset($_POST["item"]) || !isset($_POST["users"]) ) {
+                http_response_code(400);
+                echo "Missing parameters!";
+                die();
+            }
+
+            //Get total count
+            $stmt = $conn->prepare("SELECT `cnt` FROM `" . $_POST["id"] . "` WHERE id = ?");
+            $item = $_POST["item"];
+            if(!$stmt->bind_param("i", $item) || !$stmt->execute() || !$stmt->bind_result($cnt) || !$stmt->fetch() || !$stmt->close()) {
+                http_response_code(400);
+                echo "Error splitting money.";
+            }
+
+            //Get users
+            $users = json_decode($_POST["users"]);
+            $ratio = bcdiv($cnt, count($users));
+
+            //Create query
+            $query = "UPDATE `" . $_POST["id"] . "` SET ";
+            foreach($users as $user) {
+                $query = $query . "`p" . $user . "`=" . $ratio . ", ";
+            }
+            $query .= "WHERE id=?";
+            $query = str_replace(", WHERE", " WHERE",$query);
+            print($query);
+
+            //Run SQL
+            $stmt = $conn->prepare($query);
+            if(!$stmt->bind_param("i", $item) || !$stmt->execute() || !$stmt->close()) {
+                http_response_code(400);
+                echo "Error splitting money.";
+                exit();
+            }
+            http_response_code(201);
+            echo "ok";
+            exit();
+        }
     }
     http_response_code(400);
     echo "Missing action parameter.";

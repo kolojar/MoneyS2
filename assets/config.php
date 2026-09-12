@@ -15,6 +15,7 @@ if ($conn->connect_error) {
     die("Error connecting to DB: " . $conn->connect_error);
 }
 
+bcscale(3);
 $LETTERS = "0123456789abcdefghijklmnopqstuvwxyzABCDEFGHIJLKMNOPQERSTUVWXYZ";
 function ConvertToBase62(int $value): string {
     global $LETTERS;

@@ -4,22 +4,23 @@ import { SendPOSTDataToServerAsync } from "../formWebScripts/js/serverComunicati
 //Format time
 const params = new URLSearchParams(window.location.search);
 for (const element of document.getElementsByClassName("timeFormat")) {
-    element.innerHTML = new Date(element.innerHTML.replace(' ', 'T') + 'Z').toLocaleString(navigator.languages[0], {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false
-    }).replace(',', ' ');
-}
-//Get names
-const names = [];
-for (const option of document.getElementById("namesEscaped").options) {
-    names.push(decodeURIComponent(option.value));
+    element.innerHTML = new Date(element.innerHTML.replace(" ", "T") + "Z")
+        .toLocaleString(navigator.languages[0], {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+    })
+        .replace(",", " ");
 }
 //Delete buttons
 for (const button of document.getElementsByClassName("btnDelete")) {
     button.addEventListener("click", async () => {
         //Confirm
-        if (!await GlobalDialogManager.ShowConfirmAsync("Delete entry", "Are you sure you want to delete entry?")) {
+        if (!(await GlobalDialogManager.ShowConfirmAsync("Delete entry", "Are you sure you want to delete entry?"))) {
             SendToast("Delete entry", "Action cancelled!", "info");
             return;
         }
@@ -41,6 +42,43 @@ for (const button of document.getElementsByClassName("btnDelete")) {
         }
         wait === null || wait === void 0 ? void 0 : wait.CloseDialog();
         await GlobalDialogManager.ShowAlertAsync("Delete entry", "Failed to delete entry: " + resp);
+    });
+}
+//Prepare names for checkboxes
+const namesCheckboxes = new Map();
+for (const option of document.getElementById("namesEscaped").options) {
+    namesCheckboxes.set(option.getAttribute("label"), { value: parseInt(option.getAttribute("value")), checked: true });
+}
+//Split money button
+for (const button of document.getElementsByClassName("btnSplitMoney")) {
+    button.addEventListener("click", async () => {
+        //Select names
+        let result = await GlobalDialogManager.ShowCheckboxSelectAsync("Split money", "Select names to slit with:", 0, namesCheckboxes);
+        if (result == 0 || result.length == 0) {
+            SendToast("Split money", "Action cancelled!", "info");
+            return;
+        }
+        if (typeof (result) == "number") {
+            result = [result];
+        }
+        //Create data
+        const wait = GlobalDialogManager.ShowProgress("Split money", "Sending data to server, please wait...", () => { }, 0, false);
+        const data = new FormData();
+        data.set("action", "splitMoney");
+        data.set("id", params.get("id"));
+        data.set("item", button.getAttribute("fid"));
+        data.set("users", JSON.stringify(result));
+        //Send POST
+        const [ok, resp] = await SendPOSTDataToServerAsync("./itemInfo.php", data);
+        if (ok) {
+            SendToast("Split money", "Money splited!", "ok");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            return;
+        }
+        wait === null || wait === void 0 ? void 0 : wait.CloseDialog();
+        await GlobalDialogManager.ShowAlertAsync("Split money", "Failed to split money: " + resp);
     });
 }
 //# sourceMappingURL=sheet.js.map
