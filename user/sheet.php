@@ -152,7 +152,7 @@ if (isset($_GET["viewOnly"])) {
         }
         echo "</td>";
         for ($i = 0; $i<count($names);$i++) {
-            echo "<td name='" . $i . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value["p".$i]) ? rtrim(rtrim($value["p".$i],"0")?:"0",".")?:"0" : "0") . "</td>";
+            echo "<td max='" . $value["cnt"] . "' name='" . $i . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value["p".$i]) ? rtrim(rtrim($value["p".$i],"0")?:"0",".")?:"0" : "0") . "</td>";
         }
         $i = 0;
         foreach ($names as $name) {
@@ -188,7 +188,7 @@ if (isset($_GET["viewOnly"])) {
         echo "<tr>";
         echo "<th class='form-horizontal-header'>" . $row . "</th>";
         foreach($names as $col) {
-            $val = (isset($whoOwesWho[$col][$row]) ? $whoOwesWho[$col][$row] : "0");
+            $val = (isset($whoOwesWho[$col][$row]) ? $whoOwesWho[$col][$row] : "0.000");
             echo  "<td who-used='" . rawurlencode($col) . "' who-paid='" . rawurlencode($row) . "'  style='text-align:center' class='" . ($val == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $val . "</td>";
         }
         echo "</tr>";
@@ -213,11 +213,12 @@ if (isset($_GET["viewOnly"])) {
         echo "<tr>";
         echo "<th class='form-horizontal-header'>" . $row . "</th>";
         foreach($names as $col) {
-            $rowOwesColVal = (isset($whoOwesWho[$row][$col]) ? $whoOwesWho[$row][$col] : "0");
-            $colOwesRowVal = (isset($whoOwesWho[$col][$row]) ? $whoOwesWho[$col][$row] : "0");
+            $rowOwesColVal = (isset($whoOwesWho[$row][$col]) ? $whoOwesWho[$row][$col] : "0.000");
+            $colOwesRowVal = (isset($whoOwesWho[$col][$row]) ? $whoOwesWho[$col][$row] : "0.000");
             $diff = bcsub($colOwesRowVal,$rowOwesColVal);
+
             if(bccomp($diff,"0") == -1) {
-                $diff = "0";
+                $diff = "0.000";
             }
             echo  "<td who-used='" . rawurlencode($col) . "' who-paid='" . rawurlencode($row) . "' style='text-align:center' class='" . ($diff == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $diff . "</td>";
         }

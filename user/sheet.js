@@ -81,4 +81,82 @@ for (const button of document.getElementsByClassName("btnSplitMoney")) {
         await GlobalDialogManager.ShowAlertAsync("Split money", "Failed to split money: " + resp);
     });
 }
+//Set amount
+for (const cell of document.getElementsByClassName("fieldCount")) {
+    cell.addEventListener("click", async () => {
+        //Get new value
+        const amount = await GlobalDialogManager.ShowPromptAsync("Set used count", "Enter used count:", -1, "number", {
+            min: "0",
+            max: cell.getAttribute("max"),
+            step: "0.001",
+            placeholder: cell.innerHTML,
+            presetValue: cell.innerHTML
+        });
+        if (amount == null || amount < 0) {
+            SendToast("Set used count", "Action cancelled!", 'info');
+            return;
+        }
+        //Create data
+        const wait = GlobalDialogManager.ShowProgress("Set used count", "Sending data to server, please wait...", () => { }, 0, false);
+        const data = new FormData();
+        data.set("action", "setCount");
+        data.set("id", params.get("id"));
+        data.set("item", cell.getAttribute("fid"));
+        data.set("user", cell.getAttribute("name"));
+        data.set("amount", amount.toString());
+        //Send POST
+        const [ok, resp] = await SendPOSTDataToServerAsync("./itemInfo.php", data);
+        if (ok) {
+            SendToast("Set used count", "Used count saved!", "ok");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            return;
+        }
+        wait === null || wait === void 0 ? void 0 : wait.CloseDialog();
+        await GlobalDialogManager.ShowAlertAsync("Set used count", "Failed to set used count: " + resp);
+    });
+}
+//Pay cells
+for (const cell of document.getElementsByClassName("cellPay")) {
+    cell.addEventListener("click", async () => {
+        var _a, _b;
+        //Show pay info
+        const amount = await GlobalDialogManager.ShowPromptAsync("Pay", "User: " + cell.getAttribute("who-used") + " has to pay: " + cell.innerHTML + " to: " + cell.getAttribute("who-paid"), -1, "number", {
+            step: "0.001",
+            placeholder: cell.innerHTML,
+            presetValue: cell.innerHTML
+        });
+        if (amount == null || amount < 0) {
+            SendToast("Pay", "Action cancelled!", "info");
+            return;
+        }
+        //Ask name
+        const name = await GlobalDialogManager.ShowPromptAsync("Pay", "Enter display name", null, "text", { presetValue: "Money transfer", placeholder: "Money transfer", useMinMaxAsLen: true, min: "1" });
+        if (name == null) {
+            SendToast("Pay", "Action cancelled!", "info");
+            return;
+        }
+        //Create data
+        const wait = GlobalDialogManager.ShowProgress("Pay", "Sending data to server, please wait...", () => { }, 0, false);
+        const data = new FormData();
+        data.set("action", "pay");
+        data.set("id", params.get("id"));
+        data.set("from", ((_a = namesCheckboxes.get(cell.getAttribute("who-used"))) === null || _a === void 0 ? void 0 : _a.value.toString()));
+        data.set("to", ((_b = namesCheckboxes.get(cell.getAttribute("who-paid"))) === null || _b === void 0 ? void 0 : _b.value.toString()));
+        data.set("amount", amount.toString());
+        data.set("name", name);
+        //Send POST
+        const [ok, resp] = await SendPOSTDataToServerAsync("./itemInfo.php", data);
+        if (ok) {
+            SendToast("Pay", "Payment saved!", "ok");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            return;
+        }
+        wait === null || wait === void 0 ? void 0 : wait.CloseDialog();
+        await GlobalDialogManager.ShowAlertAsync("Pay", "Failed to save payment: " + resp);
+    });
+}
 //# sourceMappingURL=sheet.js.map
