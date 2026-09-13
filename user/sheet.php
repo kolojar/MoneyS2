@@ -145,9 +145,17 @@ if (isset($_GET["viewOnly"])) {
         return;
     }
     foreach ($valuesStmt->get_result() as $value) {
-        echo "<tr id='row" . $value["id"] . "'>";
+        //Used count
+        $usedCount = "0";
+         for ($i = 0; $i < count($names); $i++) {
+             $usedCount = bcadd($usedCount, $value["p" . $i]);
+         }
+         $high = ((bccomp(bcround($usedCount,1), bcround($value["cnt"],1)) == 0) ? "" : "trHighlight");
+
+        //Row
+        echo "<tr class='" . $high . "' id='row" . $value["id"] . "'>";
         echo "<td class='formButtonBoxTable'>";
-        echo "<button fid='" . $value["id"] . "' class='formWarnColor btnSplitMoney formButtonInline'>Split money</button>";
+        echo "<button fid='" . $value["id"] . "' class='formOkColor btnSplitMoney formButtonInline'>Split money</button>";
         echo "<a href='./itemInfo.php?id=" . $_GET["id"] . "&item=" .  $value["id"] . "'><button class='formInfoColor formButtonInline'>Edit</button></a>";
         echo "<button fid='" . $value["id"] . "' class='formErrorColor btnDelete formButtonInline'>Delete</button>";
         echo "</td>";
