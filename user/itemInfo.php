@@ -150,9 +150,26 @@ if (isset($_POST["action"])) {
                 die();
             }
 
+            //Get person count
+            $stmt = $conn->prepare("SELECT `persons` FROM `_tables` WHERE id_tables = ?");
+            $id = ConvertFromBase62($_POST["id"]);
+            if (!$stmt->bind_param("i", $id) || !$stmt->execute() || !$stmt->bind_result($persons) || !$stmt->fetch() || !$stmt->close()) {
+                http_response_code(400);
+                echo "Error splitting money.";
+                die();
+            }
+
             //Get users
             $users = json_decode($_POST["users"]);
-            $ratio = bcdiv($cnt, count($users));
+            if(count($users) == 0) {
+                $users = [];
+                for($i = 0; $i < count(explode(";",$persons)); $i++) {
+                    $users[] = $i;
+                }
+                $ratio = "0";
+            } else {
+                $ratio = bcdiv($cnt, count($users));
+            }
 
             //Create query
             $query = "UPDATE `" . $_POST["id"] . "` SET ";
@@ -161,7 +178,6 @@ if (isset($_POST["action"])) {
             }
             $query .= "WHERE id=?";
             $query = str_replace(", WHERE", " WHERE", $query);
-            print $query;
 
             //Run SQL
             $stmt = $conn->prepare($query);

@@ -7,11 +7,10 @@ const hash = window.location.hash.replace("#", "");
 let newHash = document.getElementById(hash)?.previousElementSibling?.previousElementSibling?.id
 console.log(newHash)
 if (newHash == undefined || newHash == "") {
-  newHash = hash;
+  newHash = "row0";
 }
-  window.location.hash = "";
-  window.location.hash = newHash;
-
+window.location.hash = "";
+window.location.hash = "#" + newHash;
 
 //Format time
 const params = new URLSearchParams(window.location.search);
@@ -84,7 +83,7 @@ for (const button of document.getElementsByClassName("btnSplitMoney")) {
   button.addEventListener("click", async () => {
     //Select names
     let result = await GlobalDialogManager.ShowCheckboxSelectAsync<number>("Split money", "Select names to slit with:", -1, namesCheckboxes);
-    if (result == -1 || (result as number[]).length == 0) {
+    if (result == -1) {
       SendToast("Split money", "Action cancelled!", "info");
       return
     }
