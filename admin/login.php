@@ -2,14 +2,40 @@
     require __DIR__ . "/../assets/config.php";
     session_start();
 
+    //Handle timeouts
+    if(!isset($_SESSION['loginTimeoutLevel'])){
+        $_SESSION['loginTimeoutLevel'] = 1;
+    }
+    if(!isset($_SESSION['loginTries'])){
+        $_SESSION['loginTries'] = 3;
+    }
+    if($_SESSION["loginTries"] ==0 && time() - $_SESSION['loginTimeout'] > 60 * $_SESSION['loginTimeoutLevel']) {
+        $_SESSION["loginTries"] = 3;
+        $_SESSION['loginTimeoutLevel'] =  $_SESSION['loginTimeoutLevel']  + 1;
+    }
+    if($_SESSION["loginTries"] == 0) {
+        http_response_code(403);
+        echo "Wait for timeout (" . $_SESSION['loginTimeoutLevel'] . " minute/s).";
+        die();
+    }
+
     //Handle POST
     if (isset($_POST["password"])) {
         if($_POST["password"] == $_SERVER["adminPassword"]) {
             http_response_code(200);
             $_SESSION["isAdmin"] = true;
+            $_SESSION['loginTries'] = 3;
+            $_SESSION['loginTimeoutLevel'] = 1;
             echo "ok";
             die();
         }
+
+        //Handle timeout
+        $_SESSION["loginTries"] = $_SESSION["loginTries"] - 1;
+        if($_SESSION["loginTries"] == 0) {
+            $_SESSION['loginTimeout'] = time();
+        }
+        $_SESSION["loggedIn"] = "";
         http_response_code(403);
         echo "Invalid password";
         die();

@@ -6,16 +6,43 @@ session_start();
 
 //Handle POST
 if (isset($_POST["password"])) {
+    //Handle timeouts
+    if(!isset($_SESSION['loginTimeoutLevel'])){
+        $_SESSION['loginTimeoutLevel'] = 1;
+    }
+    if(!isset($_SESSION['loginTries'])){
+        $_SESSION['loginTries'] = 3;
+    }
+    if($_SESSION["loginTries"] ==0 && time() - $_SESSION['loginTimeout'] > 60 * $_SESSION['loginTimeoutLevel']) {
+        $_SESSION["loginTries"] = 3;
+        $_SESSION['loginTimeoutLevel'] =  $_SESSION['loginTimeoutLevel']  + 1;
+    }
+    if($_SESSION["loginTries"] == 0) {
+        http_response_code(403);
+        echo "Wait for timeout (" . $_SESSION['loginTimeoutLevel'] . " minute/s).";
+        die();
+    }
+
+    //Try login
     $passwordResult = $conn->query("SELECT `password` FROM `_tables` WHERE id_tables = " . ConvertFromBase62($_POST["id"]));
     $password = $passwordResult->fetch_assoc()["password"];
     if (password_verify($_POST["password"],  $password)) {
         http_response_code(200);
         $_SESSION["loggedIn"] = $_POST["id"];
+        $_SESSION['loginTries'] = 3;
+        $_SESSION['loginTimeoutLevel'] = 1;
         echo "ok";
         die();
     }
+
+    //Handle timeout
+    $_SESSION["loginTries"] = $_SESSION["loginTries"] - 1;
+    if($_SESSION["loginTries"] == 0) {
+        $_SESSION['loginTimeout'] = time();
+    }
+    $_SESSION["loggedIn"] = "";
     http_response_code(403);
-    echo "Invalid password";
+    echo "Invalid password!";
     die();
 }
 
@@ -31,6 +58,7 @@ if(CheckAccess($_GET["id"])) {
     header("Location: ./sheet.php?id=" . $_GET["id"]);
     die();
 }
+$_SESSION["loggedIn"] = "";
 ?>
 
 <!doctype html>
