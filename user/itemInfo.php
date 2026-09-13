@@ -103,6 +103,28 @@ if (isset($_POST["action"])) {
                 echo "Error inserting sheet.";
                 exit();
             }
+            $newId = $stmt->insert_id;
+
+            //Split if needed
+            if($_POST["splitToAll"] == "true") {
+                //Get person count
+                $stmt = $conn->prepare("SELECT `persons` FROM `_tables` WHERE id_tables = ?");
+                $idNormal = ConvertFromBase62($_POST["id"]);
+                if (!$stmt->bind_param("i", $idNormal) || !$stmt->execute() || !$stmt->bind_result($persons) || !$stmt->fetch() || !$stmt->close()) {
+                    http_response_code(400);
+                    echo "Error splitting money.";
+                    die();
+                }
+
+                //Split
+                $users = [];
+                for($i = 0; $i < count(explode(";",$persons)); $i++) {
+                    $users[] =$i;
+                }
+                splitMoney($conn,$_POST["id"], $item, $users);
+            }
+
+            //Send OK
             UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
@@ -129,6 +151,28 @@ if (isset($_POST["action"])) {
                 echo "Error updating sheet.";
                 exit();
             }
+
+            //Split if needed
+            echo $_POST["splitToAll"];
+            if($_POST["splitToAll"] == "true") {
+                //Get person count
+                $stmt = $conn->prepare("SELECT `persons` FROM `_tables` WHERE id_tables = ?");
+                $idNormal = ConvertFromBase62($_POST["id"]);
+                if (!$stmt->bind_param("i", $idNormal) || !$stmt->execute() || !$stmt->bind_result($persons) || !$stmt->fetch() || !$stmt->close()) {
+                    http_response_code(400);
+                    echo "Error splitting money.";
+                    die();
+                }
+
+                //Split
+                $users = [];
+                for($i = 0; $i < count(explode(";",$persons)); $i++) {
+                    $users[] =$i;
+                }
+                splitMoney($conn,$_POST["id"], $item, $users);
+            }
+
+            //Send OK
             UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
@@ -141,51 +185,8 @@ if (isset($_POST["action"])) {
                 die();
             }
 
-            //Get total count
-            $stmt = $conn->prepare("SELECT `cnt` FROM `" . $_POST["id"] . "` WHERE id = ?");
-            $item = $_POST["item"];
-            if (!$stmt->bind_param("i", $item) || !$stmt->execute() || !$stmt->bind_result($cnt) || !$stmt->fetch() || !$stmt->close()) {
-                http_response_code(400);
-                echo "Error splitting money.";
-                die();
-            }
-
-            //Get person count
-            $stmt = $conn->prepare("SELECT `persons` FROM `_tables` WHERE id_tables = ?");
-            $id = ConvertFromBase62($_POST["id"]);
-            if (!$stmt->bind_param("i", $id) || !$stmt->execute() || !$stmt->bind_result($persons) || !$stmt->fetch() || !$stmt->close()) {
-                http_response_code(400);
-                echo "Error splitting money.";
-                die();
-            }
-
-            //Get users
-            $users = json_decode($_POST["users"]);
-            if(count($users) == 0) {
-                $users = [];
-                for($i = 0; $i < count(explode(";",$persons)); $i++) {
-                    $users[] = $i;
-                }
-                $ratio = "0";
-            } else {
-                $ratio = bcdiv($cnt, count($users));
-            }
-
-            //Create query
-            $query = "UPDATE `" . $_POST["id"] . "` SET ";
-            foreach ($users as $user) {
-                $query = $query . "`p" . $user . "`=" . $ratio . ", ";
-            }
-            $query .= "WHERE id=?";
-            $query = str_replace(", WHERE", " WHERE", $query);
-
-            //Run SQL
-            $stmt = $conn->prepare($query);
-            if (!$stmt->bind_param("i", $item) || !$stmt->execute() || !$stmt->close()) {
-                http_response_code(400);
-                echo "Error splitting money.";
-                exit();
-            }
+            //Split
+            splitMoney($conn,$_POST["id"],$_POST["item"], json_decode($_POST["users"]));
             UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
@@ -287,6 +288,52 @@ if (!$nameStmt->bind_param("s", $id) || !$nameStmt->execute() || !$nameStmt->bin
     die();
 }
 $tableId = ConvertFromBase62($_GET["id"]);
+
+function splitMoney(mysqli $conn, string $id, string $item, array $users) {
+    //Get total count
+    $stmt = $conn->prepare("SELECT `cnt` FROM `" . $id  . "` WHERE id = ?");
+    if (!$stmt->bind_param("i", $item) || !$stmt->execute() || !$stmt->bind_result($cnt) || !$stmt->fetch() || !$stmt->close()) {
+        http_response_code(400);
+        echo "Error splitting money.";
+        die();
+    }
+
+    //Get person count
+    $stmt = $conn->prepare("SELECT `persons` FROM `_tables` WHERE id_tables = ?");
+    $idNormal = ConvertFromBase62($id);
+    if (!$stmt->bind_param("i", $idNormal) || !$stmt->execute() || !$stmt->bind_result($persons) || !$stmt->fetch() || !$stmt->close()) {
+        http_response_code(400);
+        echo "Error splitting money.";
+        die();
+    }
+
+    //Get users
+    if(count($users) == 0) {
+        $users = [];
+        for($i = 0; $i < count(explode(";",$persons)); $i++) {
+            $users[] = $i;
+        }
+        $ratio = "0";
+    } else {
+        $ratio = bcdiv($cnt, count($users));
+    }
+
+    //Create query
+    $query = "UPDATE `" . $id . "` SET ";
+    foreach ($users as $user) {
+        $query = $query . "`p" . $user . "`=" . $ratio . ", ";
+    }
+    $query .= "WHERE id=?";
+    $query = str_replace(", WHERE", " WHERE", $query);
+
+    //Run SQL
+    $stmt = $conn->prepare($query);
+    if (!$stmt->bind_param("i", $item) || !$stmt->execute() || !$stmt->close()) {
+        http_response_code(400);
+        echo "Error splitting money.";
+        exit();
+    }
+}
 ?>
 
 <!doctype html>
@@ -345,15 +392,16 @@ $tableId = ConvertFromBase62($_GET["id"]);
             <form-input id="name"  tabindex=4 minlength=1 label="Name of item:" type="search-realtime" placeholder="Name of item" value="<?php echo $info["name"]; ?>"></form-input>
             <form-input id="count"  tabindex=5 min=1 minlength=1 label="Count:" type="number" placeholder="Count" value="<?php echo $info["cnt"]; ?>"></form-input>
             <form-input id="price"  tabindex=6 minlength=1 label="Price per item:" type="number" step=0.001 placeholder="Price per item" value="<?php echo $info["price"]; ?>"></form-input>
+            <form-toggle id="splitBetweenAll"  tabindex=7 label="Split between all on save"></form-toggle>
             <div class='formButtonBoxHolder'>
                 <div class="formJustifyLeft">
                     <a  tabindex=11 href='./sheet.php?id=<?php echo $_GET["id"]; echo isset($_GET["item"]) ? ("#row" . $_GET["item"]) : "" ?>'><button class="formErrorColor">Exit</button></a>
-                    <button class="formErrorColor"  tabindex=9 id="btnClear">Clear</button>
-                    <button class="formWarnColor"  tabindex=10 id="btnRestore">Restore from memory</button>
+                    <button class="formErrorColor"  tabindex=10 id="btnClear">Clear</button>
+                    <button class="formWarnColor"  tabindex=11 id="btnRestore">Restore from memory</button>
                 </div>
                 <div class="formJustifyRight">
-                    <button class="btnSave formOkColor"  tabindex=7 exit=0>Save</button>
-                    <button class="btnSave formInfoColor"  tabindex=8 exit=1>Save and exit</button>
+                    <button class="btnSave formOkColor"  tabindex=8 exit=0>Save</button>
+                    <button class="btnSave formInfoColor"  tabindex=9 exit=1>Save and exit</button>
                 </div>
             </div>
             <i>Note: When adding new item and clicking Save, new entry will always be added.</i>

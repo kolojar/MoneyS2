@@ -114,6 +114,7 @@ for (const button of document.getElementsByClassName("btnSave")) {
         formData.set("name", name.value);
         formData.set("count", count.value);
         formData.set("price", price.value);
+        formData.set("splitToAll", document.getElementById("splitBetweenAll").checked ? "true" : "false");
         //Create JSON for memory
         const jsonData = {};
         jsonData["id"] = params.get("id");
