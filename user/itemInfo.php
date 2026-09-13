@@ -326,7 +326,7 @@ $tableId = ConvertFromBase62($_GET["id"]);
             <form-input id="price"  tabindex=6 minlength=1 label="Price per item:" type="number" step=0.001 placeholder="Price per item" value="<?php echo $info["price"]; ?>"></form-input>
             <div class='formButtonBoxHolder'>
                 <div class="formJustifyLeft">
-                    <a  tabindex=11 href='./sheet.php?id=<?php echo $_GET["id"]; ?>'><button class="formErrorColor">Exit</button></a>
+                    <a  tabindex=11 href='./sheet.php?id=<?php echo $_GET["id"]; echo isset($_GET["item"]) ? ("#row" . $_GET["item"]) : "" ?>'><button class="formErrorColor">Exit</button></a>
                     <button class="formErrorColor"  tabindex=9 id="btnClear">Clear</button>
                     <button class="formWarnColor"  tabindex=10 id="btnRestore">Restore from memory</button>
                 </div>

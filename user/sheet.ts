@@ -62,8 +62,10 @@ for (const button of document.getElementsByClassName("btnDelete")) {
 
 //Prepare names for checkboxes
 const namesCheckboxes = new Map<string, FormDialogCheckboxSelectData<number>>();
+const names = new Map<number,string>();
 for (const option of (document.getElementById("namesEscaped") as HTMLDataListElement).options) {
-  namesCheckboxes.set(decodeURIComponent( option.getAttribute("label") as string), {value:parseInt(option.getAttribute("value") as string), checked: true })
+  namesCheckboxes.set(decodeURIComponent(option.getAttribute("label") as string), { value: parseInt(option.getAttribute("value") as string), checked: true })
+  names.set(parseInt(option.getAttribute("value") as string), decodeURIComponent(option.getAttribute("label") as string))
 }
 
 //Split money button
@@ -144,7 +146,7 @@ for (const cell of document.getElementsByClassName("fieldCount")) {
 for (const cell of document.getElementsByClassName("cellPay")) {
   cell.addEventListener("click", async () => {
     //Show pay info
-    const amount = await GlobalDialogManager.ShowPromptAsync("Pay", "User: " + cell.getAttribute("who-used") + " has to pay: " + cell.innerHTML + " to: " + cell.getAttribute("who-paid"), -1, "number", {
+    const amount = await GlobalDialogManager.ShowPromptAsync("Pay", "User: " + names.get(parseInt(cell.getAttribute("who-used") as string)) + " has to pay: " + cell.innerHTML + " to: " + names.get(parseInt(cell.getAttribute("who-paid") as string)), -1, "number", {
       step: "0.001",
       placeholder: cell.innerHTML,
       presetValue: cell.innerHTML
@@ -166,8 +168,8 @@ for (const cell of document.getElementsByClassName("cellPay")) {
     const data = new FormData();
     data.set("action", "pay")
     data.set("id", params.get("id") as string)
-    data.set("from",(namesCheckboxes.get(cell.getAttribute("who-used") as string)?.value.toString()) as string)
-    data.set("to", (namesCheckboxes.get(cell.getAttribute("who-paid") as string)?.value.toString()) as string)
+    data.set("from",cell.getAttribute("who-used") as string)
+    data.set("to", cell.getAttribute("who-paid") as string)
     data.set("amount", amount.toString())
     data.set("name", name)
 
@@ -176,6 +178,7 @@ for (const cell of document.getElementsByClassName("cellPay")) {
     if (ok) {
       SendToast("Pay", "Payment saved!", "ok")
       setTimeout(() => {
+        window.location.hash = "#row" + (cell.getAttribute("target") as string) + (cell.getAttribute("who-paid") as string);
         window.location.reload()
       }, 1000)
       return

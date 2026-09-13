@@ -118,18 +118,18 @@ if (isset($_GET["viewOnly"])) {
     echo "<th colspan=" . count($names) . ">Used price</th>";
     echo "</tr>";
     echo "<tr>";
-    echo "<th>When</th>";
-    echo "<th>Where</th>";
-    echo "<th>Who</th>";
-    echo "<th>Name</th>";
-    echo "<th>Count</th>";
-    echo "<th>Price per item</th>";
-    echo "<th>Linked items</th>";
+    echo "<th class='tableStickySecondRow'>When</th>";
+    echo "<th class='tableStickySecondRow'>Where</th>";
+    echo "<th class='tableStickySecondRow'>Who</th>";
+    echo "<th class='tableStickySecondRow'>Name</th>";
+    echo "<th class='tableStickySecondRow'>Count</th>";
+    echo "<th class='tableStickySecondRow'>Price per item</th>";
+    echo "<th class='tableStickySecondRow'>Linked items</th>";
     foreach ($names as $name) {
-        echo "<th>" . $name . "</th>";
+        echo "<th class='tableStickySecondRow'>" . $name . "</th>";
     }
     foreach ($names as $name) {
-        echo "<th>" . $name . "</th>";
+        echo "<th class='tableStickySecondRow'>" . $name . "</th>";
     }
     echo "</tr>";
 
@@ -138,16 +138,14 @@ if (isset($_GET["viewOnly"])) {
     $whoOwesWho = [];
     //Day -> Where -> Who = amount
     $stats = [];
-    //Place -> Who -> Price
-    $places = [];
-    $valuesStmt = $conn->prepare("SELECT * FROM " .  $_GET["id"]);
+    $valuesStmt = $conn->prepare("SELECT * FROM " .  $_GET["id"] ." ORDER BY `when`");
     if (!$valuesStmt->execute()) {
         http_response_code(400);
         echo "Invalid sheet. B";
         return;
     }
     foreach ($valuesStmt->get_result() as $value) {
-        echo "<tr id='row'" . $value["id"] . ">";
+        echo "<tr id='row" . $value["id"] . "'>";
         echo "<td class='formButtonBoxTable'>";
         echo "<button fid='" . $value["id"] . "' class='formWarnColor btnSplitMoney formButtonInline'>Split money</button>";
         echo "<a href='./itemInfo.php?id=" . $_GET["id"] . "&item=" .  $value["id"] . "'><button class='formInfoColor formButtonInline'>Edit</button></a>";
@@ -166,7 +164,6 @@ if (isset($_GET["viewOnly"])) {
             echo "<button fid='" . $value["id"] . "' class='formOkColor btnAddLink formButtonInline'>Add link</button>";
         }
         echo "</td>";
-        $places[$value["where"]][$names[$value["who"]]] = bcadd($places[$value["where"]][$names[$value["who"]]], bcmul($value["cnt"], $value["price"]));
         for ($i = 0; $i<count($names);$i++) {
             echo "<td style='text-align:center' max='" . $value["cnt"] . "' name='" . $i . "' fid='" . $value["id"] . "' class='mouseField fieldCount'>" . (isset($value["p".$i]) ? rtrim(rtrim($value["p".$i],"0")?:"0",".")?:"0" : "0") . "</td>";
         }
@@ -176,6 +173,7 @@ if (isset($_GET["viewOnly"])) {
             echo "<td style='text-align:center'>" . $diff . "</td>";
             $whoOwesWho[$name][$names[$value["who"]]] = bcadd(isset($whoOwesWho[$name][$names[$value["who"]]]) ? $whoOwesWho[$name][$names[$value["who"]]] : "0", $diff);
             $stats[explode(" ",$value["when"])[0]][$value["where"]][$name] = bcadd($stats[explode(" ",$value["when"])[0]][$value["where"]][$name], $diff);
+            //$places[$value["where"]][$names[$value["who"]]] = bcadd($places[$value["where"]][$names[$value["who"]]], bcmul($value["cnt"], $value["price"]));
             $i++;
         }
         echo "</tr>";
@@ -196,12 +194,12 @@ if (isset($_GET["viewOnly"])) {
         echo "<th>" . $name . "</th>";
     }
     echo "</tr>";
-    foreach($names as $row) {
-        echo "<tr>";
+    foreach($names as $idRow => $row) {
+        echo "<tr id='rowOwesTo" . $idRow . "'>";
         echo "<th class='form-horizontal-header'>" . $row . "</th>";
-        foreach($names as $col) {
+        foreach($names as $idCol => $col) {
             $val = (isset($whoOwesWho[$col][$row]) ? $whoOwesWho[$col][$row] : "0.000");
-            echo  "<td who-used='" . rawurlencode($col) . "' who-paid='" . rawurlencode($row) . "'  style='text-align:center' class='" . ($val == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $val . "</td>";
+            echo  "<td target='OwesTo' who-used='" . $idCol . "' who-paid='" . $idRow . "'  style='text-align:center' class='" . ($val == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $val . "</td>";
         }
         echo "</tr>";
     }
@@ -221,10 +219,10 @@ if (isset($_GET["viewOnly"])) {
         echo "<th>" . $name . "</th>";
     }
     echo "</tr>";
-    foreach($names as $row) {
-        echo "<tr>";
+    foreach($names as $idRow => $row) {
+        echo "<tr id='rowPaysTo" . $idRow . "'>";
         echo "<th class='form-horizontal-header'>" . $row . "</th>";
-        foreach($names as $col) {
+        foreach($names as $idCol => $col) {
             $rowOwesColVal = (isset($whoOwesWho[$row][$col]) ? $whoOwesWho[$row][$col] : "0.000");
             $colOwesRowVal = (isset($whoOwesWho[$col][$row]) ? $whoOwesWho[$col][$row] : "0.000");
             $diff = bcsub($colOwesRowVal,$rowOwesColVal);
@@ -232,7 +230,7 @@ if (isset($_GET["viewOnly"])) {
             if(bccomp($diff,"0") == -1) {
                 $diff = "0.000";
             }
-            echo  "<td who-used='" . rawurlencode($col) . "' who-paid='" . rawurlencode($row) . "' style='text-align:center' class='" . ($diff == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $diff . "</td>";
+            echo  "<td  target='PaysTo' who-used='" . $idCol . "' who-paid='" . $idRow . "' style='text-align:center' class='" . ($diff == "0" ? "formOkColor" : "mouseField cellPay") . "'>" . $diff . "</td>";
         }
         echo "</tr>";
     }
@@ -241,6 +239,8 @@ if (isset($_GET["viewOnly"])) {
 
     //Generate days
     echo "<h1>Info per day</h1>";
+    //Place -> Who -> Price
+    $places = [];
     foreach($stats as $day => $dayInfo) {
         echo "<h2 class='dateFormat'>" . $day . "</h2>";
         echo "<div class='tableScrollHolder'>";
@@ -262,6 +262,7 @@ if (isset($_GET["viewOnly"])) {
                 echo "<td style='text-align:center'>" .$placeInfo[$name] . "</td>";
                 $placeSum = bcadd($placeSum,$placeInfo[$name]);
                 $nameSum[$name] = bcadd($nameSum[$name],$placeInfo[$name]);
+                $places[$where][$name] = bcadd($places[$where][$name],$placeInfo[$name]);
             }
             echo "<td style='text-align:center'>" . $placeSum . "</td>";
             echo "</tr>";
