@@ -2,6 +2,12 @@ import { FormDialogCheckboxSelectData, GlobalDialogManager } from "../formWebScr
 import { SendToast } from "../formWebScripts/js/formScript.js";
 import { SendPOSTDataToServerAsync } from "../formWebScripts/js/serverComunication.js";
 
+//Hash
+const hash = window.location.hash;
+console.log(hash)
+window.location.hash = "";
+window.location.hash = hash;
+
 //Format time
 const params = new URLSearchParams(window.location.search);
 for (const element of document.getElementsByClassName("timeFormat")) {
@@ -94,7 +100,8 @@ for (const button of document.getElementsByClassName("btnSplitMoney")) {
     if (ok) {
       SendToast("Split money", "Money splited!", "ok")
       setTimeout(() => {
-        window.location.reload()
+        window.location.href = window.location.pathname + window.location.search + "#row" + (button.getAttribute("fid") as string);
+        window.location.reload();
       }, 1000)
       return
     }
@@ -178,8 +185,8 @@ for (const cell of document.getElementsByClassName("cellPay")) {
     if (ok) {
       SendToast("Pay", "Payment saved!", "ok")
       setTimeout(() => {
-        window.location.hash = "#row" + (cell.getAttribute("target") as string) + (cell.getAttribute("who-paid") as string);
-        window.location.reload()
+        window.location.href = window.location.pathname + window.location.search + "#row" + (cell.getAttribute("target") as string) + (cell.getAttribute("who-paid") as string);;
+        window.location.reload();
       }, 1000)
       return
     }
