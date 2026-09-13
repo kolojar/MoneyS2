@@ -172,7 +172,11 @@ if (isset($_GET["viewOnly"])) {
             $diff = bcmul(isset($value["p".$i]) ? $value["p".$i] : "0", $value["price"]);
             echo "<td style='text-align:center'>" . $diff . "</td>";
             $whoOwesWho[$name][$names[$value["who"]]] = bcadd(isset($whoOwesWho[$name][$names[$value["who"]]]) ? $whoOwesWho[$name][$names[$value["who"]]] : "0", $diff);
-            $stats[explode(" ",$value["when"])[0]][$value["where"]][$name] = bcadd($stats[explode(" ",$value["when"])[0]][$value["where"]][$name], $diff);
+            $whenDate = explode(" ",$value["when"])[0];
+            if(!isset( $stats[$whenDate]) || !isset($stats[$whenDate][$value["where"]]) || !isset($stats[$whenDate][$value["where"]][$name])) {
+                $stats[$whenDate][$value["where"]][$name] = "0";
+            }
+            $stats[$whenDate][$value["where"]][$name] = bcadd($stats[explode(" ",$value["when"])[0]][$value["where"]][$name]?:"0", $diff);
             //$places[$value["where"]][$names[$value["who"]]] = bcadd($places[$value["where"]][$names[$value["who"]]], bcmul($value["cnt"], $value["price"]));
             $i++;
         }
@@ -259,10 +263,16 @@ if (isset($_GET["viewOnly"])) {
             echo "<th class='form-horizontal-header'>" . $where . "</th>";
             $placeSum = "0";
             foreach($names as $name) {
-                echo "<td style='text-align:center'>" .$placeInfo[$name] . "</td>";
-                $placeSum = bcadd($placeSum,$placeInfo[$name]);
-                $nameSum[$name] = bcadd($nameSum[$name],$placeInfo[$name]);
-                $places[$where][$name] = bcadd($places[$where][$name],$placeInfo[$name]);
+                echo "<td style='text-align:center'>" .$placeInfo[$name]?:"0" . "</td>";
+                $placeSum = bcadd($placeSum,$placeInfo[$name]?:"0");
+                if(!isset($nameSum[$name] )) {
+                    $nameSum[$name] = "0";
+                }
+                $nameSum[$name] = bcadd($nameSum[$name]?:"0",$placeInfo[$name]?:"0");
+                if(!isset($places[$where]) || !isset( $places[$where][$name])) {
+                     $places[$where][$name] = "0";
+                }
+                $places[$where][$name] = bcadd($places[$where][$name]?:"0",$placeInfo[$name]);
             }
             echo "<td style='text-align:center'>" . $placeSum . "</td>";
             echo "</tr>";
@@ -299,8 +309,11 @@ if (isset($_GET["viewOnly"])) {
         $rowSum = "0";
         foreach($names as $name) {
             echo "<td style='text-align:center'>" . (isset($placeInfo[$name]) ? $placeInfo[$name] : "0.000") . "</td>";
-            $rowSum = bcadd($rowSum, $placeInfo[$name]);
-            $nameSum[$name] = bcadd($nameSum[$name], $placeInfo[$name]);
+            $rowSum = bcadd($rowSum, $placeInfo[$name]?:"0");
+            if(!isset($nameSum[$name] )) {
+                 $nameSum[$name]  = "0";
+            }
+            $nameSum[$name] = bcadd($nameSum[$name]?:"0", $placeInfo[$name]);
         }
         echo "<td style='text-align:center'>" . $rowSum. "</td>";
         echo "</tr>";
