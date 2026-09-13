@@ -40,7 +40,7 @@ session_start();
         //Get active sheets
         $result = $conn->query("SELECT * FROM `_tables` ORDER BY `updated` DESC");
         while ($row = $result->fetch_assoc()) {
-            echo "<tr rid='" . $row["id"] . "'>";
+            echo "<tr rid='" . $row["id_tables"] . "'>";
             echo "<td>" . $row["name"] . "</td>";
             echo "<td class='timeFormat'>" . $row["updated"] . "</td>";
             echo "<td class='formButtonBoxTable'>";
