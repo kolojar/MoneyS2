@@ -1,6 +1,6 @@
 <?php
 /** @var mysqli $conn */
-require __DIR__."/sharedFunctions.php";
+require __DIR__."/config.php";
 
 bcscale(3);
 $LETTERS = "0123456789abcdefghijklmnopqstuvwxyzABCDEFGHIJLKMNOPQERSTUVWXYZ";
