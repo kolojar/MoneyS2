@@ -6,7 +6,7 @@ if (!isset($_SESSION["isAdmin"]) || $_SESSION["isAdmin"] != true) {
 }
 
 /** @var \mysqli $conn */
-require __DIR__ . "/../assets/config.php";
+require __DIR__ . "/../assets/sharedFunctions.php";
 if (!isset($_GET["view"]) || ($_GET["view"] != "active" && $_GET["view"] != "archived")) {
     $_GET["view"] = "active";
 }

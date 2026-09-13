@@ -1,5 +1,5 @@
 <?php
-    require __DIR__ . "/../assets/config.php";
+    require __DIR__ . "/../assets/sharedFunctions.php";
     session_start();
 
     //Handle timeouts

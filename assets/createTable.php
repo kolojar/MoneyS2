@@ -1,7 +1,7 @@
 <!-- post [name, p0, p1, ..., pn] -->
 <?php
 /** @var mysqli $conn */
-require __DIR__."/config.php";
+require __DIR__."/sharedFunctions.php";
 
 if (!isset($_POST["name"], $_POST["p0"])) {
     die();
