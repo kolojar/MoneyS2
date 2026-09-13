@@ -103,6 +103,7 @@ if (isset($_POST["action"])) {
                 echo "Error inserting sheet.";
                 exit();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
             exit();
@@ -128,6 +129,7 @@ if (isset($_POST["action"])) {
                 echo "Error updating sheet.";
                 exit();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
             exit();
@@ -168,6 +170,7 @@ if (isset($_POST["action"])) {
                 echo "Error splitting money.";
                 exit();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
             exit();
@@ -214,6 +217,7 @@ if (isset($_POST["action"])) {
                 echo "Error setting used count.";
                 exit();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
             exit();
@@ -235,6 +239,7 @@ if (isset($_POST["action"])) {
                 echo "Error saving payment.";
                 exit();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
             exit();

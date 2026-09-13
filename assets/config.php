@@ -49,3 +49,10 @@ function CheckAccess(string $id): bool {
     }
     return $_SESSION["loggedIn"] == $id;
 }
+
+function UpdateActivity(string $id) {
+    /** @var \mysqli $conn */
+    global $conn;
+    $idNum =  ConvertFromBase62($id);
+    $conn->query("UPDATE `_tables` SET `updated`=UTC_TIMESTAMP() WHERE `id_tables` = " . $idNum);
+}

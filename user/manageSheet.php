@@ -23,6 +23,7 @@ if(isset($_POST["action"])) {
                 echo "Error saving name!";
                 die();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(200);
             echo "Name saved.";
             die();
@@ -44,6 +45,7 @@ if(isset($_POST["action"])) {
                 echo "Error saving password!";
                 die();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(200);
             echo "Password saved.";
             die();
@@ -74,6 +76,7 @@ if(isset($_POST["action"])) {
                 echo "Error deleting sheet.";
                 exit();
             }
+            UpdateActivity($_POST["id"]);
             http_response_code(201);
             echo "ok";
             exit();
