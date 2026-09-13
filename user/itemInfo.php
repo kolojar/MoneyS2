@@ -122,7 +122,7 @@ if (isset($_POST["action"])) {
                 for($i = 0; $i < count(explode(";",$persons)); $i++) {
                     $users[] =$i;
                 }
-                splitMoney($conn,$_POST["id"], $item, $users);
+                splitMoney($conn,$_POST["id"], $newId, $users);
             }
 
             //Send OK
