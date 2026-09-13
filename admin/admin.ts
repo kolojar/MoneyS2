@@ -25,7 +25,7 @@ for (const button of document.getElementsByClassName("archiveSheetBtn")) {
     const formData = new FormData()
     formData.set("action", "archive")
     formData.set("sheet", decodeURIComponent(button.getAttribute("sheet") as string))
-    const [ok, resp] = await SendPOSTDataToServerAsync("./admin.php", formData)
+    const [ok, resp] = await SendPOSTDataToServerAsync("../user/manageSheet.php", formData)
     if (ok) {
       SendToast("Archive", "Sheet archived!", "ok")
       setTimeout(() => {

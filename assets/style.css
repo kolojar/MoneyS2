@@ -1,7 +1,17 @@
-header {
+header, footer {
     background-color: lightsteelblue;
 }
 
 * {
     font-family: "Roboto";
+}
+
+html { font-size: 1.2em; }
+
+.tableScrollHolder {
+    max-height: 90%;
+}
+
+.tableStickySecondRow {
+    top: 28px;
 }

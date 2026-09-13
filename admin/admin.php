@@ -11,11 +11,6 @@ if (!isset($_GET["view"]) || ($_GET["view"] != "active" && $_GET["view"] != "arc
     $_GET["view"] = "active";
 }
 
-function encodeURIComponent($str) {
-    $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
-    return strtr(rawurlencode($str), $revert);
-}
-
 //Process POST
 if (isset($_POST["action"])) {
     if(!isset($_POST["sheet"])) {
@@ -26,30 +21,7 @@ if (isset($_POST["action"])) {
     }
     $sheet = $_POST["sheet"];
     switch($_POST["action"]) {
-        case "archive": {
-            //Run SQL
-            $stmt = $conn->prepare("UPDATE `tables` SET archived=1 WHERE name=?");
-            if(!$stmt->bind_param("s", $sheet) || !$stmt->execute() || $stmt->affected_rows == 0) {
-                http_response_code(400);
-                echo "Invalid sheet name.";
-                exit();
-            }
-            http_response_code(201);
-            echo "ok";
-            exit();
-        }
-        case "delete": {
-            //Run SQL
-            $stmt = $conn->prepare("DELETE FROM `tables` WHERE name=?");
-            if(!$stmt->bind_param("s", $sheet) || !$stmt->execute() || $stmt->affected_rows == 0) {
-                http_response_code(400);
-                echo "Invalid sheet name.";
-                exit();
-            }
-            http_response_code(201);
-            echo "ok";
-            exit();
-        }
+        
     }
 }
 ?>
@@ -94,9 +66,9 @@ if (isset($_POST["action"])) {
                 echo "<td>" . $row["name"] . "</td>";
                 echo "<td class='timeFormat'>" . $row["updated"] . "</td>";
                 echo "<td class='formButtonBoxTable'>";
-                echo "<a href='../user/sheet.php?id=". encodeURIComponent($row["name"]) . "'><button class='formInfoColor formButtonInline'>Open</button></a>";
-                echo "<button class='archiveSheetBtn formWarnColor formButtonInline' sheet='" . encodeURIComponent($row["name"]) . "'>Archive</button>";
-                echo "<button class='deleteSheetBtn formErrorColor formButtonInline' sheet='" . encodeURIComponent($row["name"]) . "'>Delete</button>";
+                echo "<a href='../user/sheet.php?id=". rawurlencode($row["name"]) . "'><button class='formInfoColor formButtonInline'>Open</button></a>";
+                echo "<button class='archiveSheetBtn formWarnColor formButtonInline' sheet='" . rawurlencode($row["name"]) . "'>Archive</button>";
+                echo "<button class='deleteSheetBtn formErrorColor formButtonInline' sheet='" . rawurlencode($row["name"]) . "'>Delete</button>";
                 echo "</td></tr>";
             }
             echo "</table>";
