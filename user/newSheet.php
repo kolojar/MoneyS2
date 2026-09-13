@@ -102,6 +102,8 @@ if (isset($_POST["name"], $_POST["password"], $_POST["people"])) {
             data.append("password", document.getElementById("password").value);
             data.append("people", document.getElementById("people").value)
 
+            data.append("people", document.getElementById("people").value.replaceAll(" ", "_"))
+
             const [ok, res] = await SendPOSTDataToServerAsync("./newSheet.php", data);
 
             if (ok) {
