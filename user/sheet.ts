@@ -140,7 +140,8 @@ for (const cell of document.getElementsByClassName("fieldCount")) {
     if (ok) {
       SendToast("Set used count", "Used count saved!", "ok")
       setTimeout(() => {
-        window.location.reload()
+        window.location.href = window.location.pathname + window.location.search + "#row" + (cell.getAttribute("target") as string) + (cell.getAttribute("who-paid") as string);;
+        window.location.reload();
       }, 1000)
       return
     }
