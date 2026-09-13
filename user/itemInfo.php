@@ -98,12 +98,13 @@ if (isset($_POST["action"])) {
             $name = $_POST["name"];
             $cnt = $_POST["count"];
             $price = $_POST["price"];
-            if (!$stmt->bind_param("ssssss", $when, $where, $who, $name, $cnt, $price) || !$stmt->execute() || !$stmt->close()) {
+            if (!$stmt->bind_param("ssssss", $when, $where, $who, $name, $cnt, $price) || !$stmt->execute()) {
                 http_response_code(400);
                 echo "Error inserting sheet.";
                 exit();
             }
             $newId = $stmt->insert_id;
+            $stmt->close();
 
             //Split if needed
             if($_POST["splitToAll"] == "true") {
