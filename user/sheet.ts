@@ -3,10 +3,15 @@ import { SendToast } from "../formWebScripts/js/formScript.js";
 import { SendPOSTDataToServerAsync } from "../formWebScripts/js/serverComunication.js";
 
 //Hash
-const hash = window.location.hash;
-console.log(hash)
-window.location.hash = "";
-window.location.hash = hash;
+const hash = window.location.hash.replace("#", "");
+let newHash = document.getElementById(hash)?.previousElementSibling?.previousElementSibling?.id
+console.log(newHash)
+if (newHash == undefined || newHash == "") {
+  newHash = hash;
+}
+  window.location.hash = "";
+  window.location.hash = newHash;
+
 
 //Format time
 const params = new URLSearchParams(window.location.search);

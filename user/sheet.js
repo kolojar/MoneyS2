@@ -1,11 +1,16 @@
+var _a, _b, _c;
 import { GlobalDialogManager } from "../formWebScripts/js/formDialogScript.js";
 import { SendToast } from "../formWebScripts/js/formScript.js";
 import { SendPOSTDataToServerAsync } from "../formWebScripts/js/serverComunication.js";
 //Hash
-const hash = window.location.hash;
-console.log(hash);
+const hash = window.location.hash.replace("#", "");
+let newHash = (_c = (_b = (_a = document.getElementById(hash)) === null || _a === void 0 ? void 0 : _a.previousElementSibling) === null || _b === void 0 ? void 0 : _b.previousElementSibling) === null || _c === void 0 ? void 0 : _c.id;
+console.log(newHash);
+if (newHash == undefined || newHash == "") {
+    newHash = hash;
+}
 window.location.hash = "";
-window.location.hash = hash;
+window.location.hash = newHash;
 //Format time
 const params = new URLSearchParams(window.location.search);
 for (const element of document.getElementsByClassName("timeFormat")) {
