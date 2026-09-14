@@ -309,6 +309,7 @@ function splitMoney(mysqli $conn, string $id, string $item, array $users) {
     }
 
     //Get users
+    $usersZero = [];
     if(count($users) == 0) {
         $users = [];
         for($i = 0; $i < count(explode(";",$persons)); $i++) {
@@ -317,12 +318,20 @@ function splitMoney(mysqli $conn, string $id, string $item, array $users) {
         $ratio = "0";
     } else {
         $ratio = bcdiv($cnt, count($users));
+        for($i = 0; $i < count(explode(";",$persons)); $i++) {
+            if(!in_array($i, $users)) {
+                $usersZero[] = $i;
+            }
+        }
     }
 
     //Create query
     $query = "UPDATE `" . $id . "` SET ";
     foreach ($users as $user) {
         $query = $query . "`p" . $user . "`=" . $ratio . ", ";
+    }
+    foreach ($usersZero as $user) {
+        $query = $query . "`p" . $user . "`=0, ";
     }
     $query .= "WHERE id=?";
     $query = str_replace(", WHERE", " WHERE", $query);
