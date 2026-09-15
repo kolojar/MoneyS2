@@ -131,7 +131,14 @@ for (const button of document.getElementsByClassName("btnSave")) {
             SendToast("Save", "Values saved!", "ok");
             if (button.getAttribute("exit") == "1") {
                 setTimeout(() => {
-                    window.location.href = "./sheet.php?id=" + params.get("id") + (params.has("item") ? "#row" + params.get("item") : "");
+                    let insert = "#row";
+                    if (params.has("item")) {
+                        insert += params.get("item");
+                    }
+                    else {
+                        insert += resp;
+                    }
+                    window.location.href = "./sheet.php?id=" + params.get("id") + insert;
                 }, 1000);
             }
             else {

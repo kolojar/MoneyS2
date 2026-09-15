@@ -252,14 +252,15 @@ if (isset($_POST["action"])) {
             $who = $_POST["from"];
             $name = $_POST["name"];
             $cnt = $_POST["amount"];
-            if (!$stmt->bind_param("ssss", $who, $name, $cnt, $cnt) || !$stmt->execute() || !$stmt->close()) {
+            if (!$stmt->bind_param("ssss", $who, $name, $cnt, $cnt) || !$stmt->execute()) {
                 http_response_code(400);
                 echo "Error saving payment.";
                 exit();
             }
             UpdateActivity($_POST["id"]);
             http_response_code(201);
-            echo "ok";
+            echo $stmt->insert_id;
+            $stmt->close();
             exit();
     }
     http_response_code(400);
